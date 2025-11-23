@@ -48,13 +48,6 @@ class MrFusionGraphAttention(nn.Module):
         self.modal_num = 3
         self.emb_atten_cat = MultiModalFusion(self.modal_num)
         if self.fusion_type == 7:
-            self.fusion1 = AdaptiveLMFusion(
-                self.modal_num,
-                [300, 300, 300],
-                output_dim=300,
-                rank=8,
-                use_softmax=False,
-            )
             self.fusion = MFusion(args, modal_num=3,
                                         with_weight=1)
 
@@ -137,13 +130,6 @@ class MrFusionGraphAttention1(nn.Module):
         self.modal_num = 3
         self.emb_atten_cat = MultiModalFusion(self.modal_num)
         if self.fusion_type == 7:
-            self.fusion1 = AdaptiveLMFusion(
-                self.modal_num,
-                [300, 300, 300],
-                output_dim=300,
-                rank=8,
-                use_softmax=False,
-            )
             self.fusion = MFusion(args, modal_num=3,
                                         with_weight=1)
 
@@ -192,91 +178,6 @@ class MultiModalFusion(nn.Module):
         ]
         joint_emb = torch.cat(embs, dim=1)
         return joint_emb
-
-
-class AdaptiveLMFusion(nn.Module):
-    """
-    Adaptive Low-rank Multimodal Fusion
-    """
-
-    def __init__(
-        self,
-        modal_num,
-        input_dim_list,
-        output_dim=300,
-        rank=8,
-        use_softmax=False,
-        fusion_beta=0.5,
-        use_layernorm=False,
-    ):
-        super(AdaptiveLMFusion, self).__init__()
-
-        self.modal_num = modal_num
-        self.rank = rank
-        self.use_softmax = use_softmax
-        self.output_dim = input_dim_list[0]
-        self.use_layernorm = use_layernorm
-        self.fusion_beta = fusion_beta
-
-        self.ent_attn = nn.Linear(input_dim_list[0], 1, bias=False)
-        self.ent_attn.requires_grad_(True)
-
-        self.fusion_beta = fusion_beta
-
-        self.factor_list = nn.ParameterList()
-        for i in range(self.modal_num):
-            input_dim = input_dim_list[i]
-            factor = nn.Parameter(
-                torch.Tensor(self.rank, input_dim + 1, self.output_dim)
-            )
-            nn.init.xavier_normal_(factor)
-            self.factor_list.append(factor)
-
-        self.fusion_weights = nn.Parameter(torch.Tensor(1, self.rank))
-        self.fusion_bias = nn.Parameter(torch.Tensor(1, self.output_dim))
-        nn.init.xavier_normal_(self.fusion_weights)
-        self.fusion_bias.data.fill_(0)
-
-        if self.use_layernorm:
-            self.layernorm = nn.LayerNorm(self.output_dim)
-
-    def forward(self, embs):
-        """
-        Args:
-            img_embed: tensor of shape (batch_size, img_dim)
-            relation_embed: tensor of shape (batch_size, relation_dim)
-            attribute_embed: tensor of shape (batch_size, attribute_dim)
-        """
-        assert len(embs) == self.modal_num
-
-        device = embs[0].device
-        batch_size = embs[0].size(0)
-
-        emb_e = torch.stack(embs, dim=1)
-        emb_u = torch.tanh(emb_e)
-        scores = self.ent_attn(emb_u).squeeze(-1)
-        attention_weights = torch.softmax(scores, dim=-1)
-
-        fusion_zy = 1.0
-        for idx in range(self.modal_num):
-            emb = F.normalize(embs[idx]) * attention_weights[:, idx].view(-1, 1)
-            emb_h = torch.cat((torch.ones(batch_size, 1, device=device), emb), dim=1)
-            factor = self.factor_list[idx]
-            emb_h = torch.matmul(emb_h, factor)
-            fusion_zy = fusion_zy * emb_h
-        lmf_output = (
-            torch.matmul(self.fusion_weights, fusion_zy.permute(1, 0, 2)).squeeze()
-            + self.fusion_bias
-        )
-
-        lmf_output = lmf_output.view(-1, self.output_dim)
-        if self.use_softmax:
-            lmf_output = torch.softmax(lmf_output, dim=-1)
-        if self.use_layernorm:
-            lmf_output = self.layernorm(lmf_output)
-        output = lmf_output
-        return output
-
 
 class MultiModalEncoderMrFusion(nn.Module):
     """
