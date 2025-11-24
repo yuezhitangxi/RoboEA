@@ -15,18 +15,12 @@ import numpy as np
 from torch_scatter import scatter_sum
 from Mfusion import *
 
-from timm.models.layers import Mlp, DropPath
 
-# try:
-    # from layers import *
-# except:
-    # from src.layers import *
-
-class MrFusionGraphAttention(nn.Module):
+class RRGAT(nn.Module):
     def __init__(
         self, args,node_size, rel_size, triple_size, node_dim, depth=1, mr_fusion_type=0
     ):
-        super(MrFusionGraphAttention, self).__init__()
+        super(RRGAT, self).__init__()
 
         self.args=args
         self.node_size = node_size
@@ -47,9 +41,7 @@ class MrFusionGraphAttention(nn.Module):
             self.attn_kernels.append(attn_kernel)
         self.modal_num = 3
         self.emb_atten_cat = MultiModalFusion(self.modal_num)
-        if self.fusion_type == 7:
-            self.fusion = MFusion(args, modal_num=3,
-                                        with_weight=1)
+
 
     def forward(self, inputs):
         outputs = []
@@ -59,16 +51,8 @@ class MrFusionGraphAttention(nn.Module):
         r_index = inputs[3]
         r_val = inputs[4]
 
-        if self.fusion_type > 0 and len(inputs) > 5:
-            embs = inputs[5]
-            early_features = self.emb_atten_cat(embs)
-            outputs.append(self.activation(early_features))
-
-            after_features = self.fusion(embs)
-            features = self.activation(after_features)
-        else:
-            features = self.activation(features)
-            outputs.append(features)
+        features = self.activation(features)
+        outputs.append(features)
 
         layer_outputs = []
         for l in range(self.depth):
@@ -103,81 +87,6 @@ class MrFusionGraphAttention(nn.Module):
         outputs = torch.cat(outputs, dim=-1)
         final_outputs = outputs
         return final_outputs
-
-class MrFusionGraphAttention1(nn.Module):
-    def __init__(
-        self, args,node_size, rel_size, triple_size, node_dim, depth=1, mr_fusion_type=0
-    ):
-        super(MrFusionGraphAttention1, self).__init__()
-
-        self.args=args,
-        self.node_size = node_size
-        self.rel_size = rel_size
-        self.triple_size = triple_size
-        self.node_dim = node_dim
-        self.activation = torch.nn.Tanh()
-        self.depth = depth
-        self.attn_kernels = nn.ParameterList()
-        self.fusion_type = mr_fusion_type
-
-
-        for l in range(self.depth):
-            attn_kernel = torch.nn.Parameter(
-                data=torch.empty(self.node_dim, 1, dtype=torch.float32)
-            )
-            nn.init.xavier_uniform_(attn_kernel)
-            self.attn_kernels.append(attn_kernel)
-        self.modal_num = 3
-        self.emb_atten_cat = MultiModalFusion(self.modal_num)
-        if self.fusion_type == 7:
-            self.fusion = MFusion(args, modal_num=3,
-                                        with_weight=1)
-
-    def forward(self, inputs):
-        outputs = []
-        features = inputs[0]
-        rel_emb = inputs[1]
-        adj = inputs[2]
-        r_index = inputs[3]
-        r_val = inputs[4]
-
-        if self.fusion_type > 0 and len(inputs) > 5:
-            embs = inputs[5]
-            early_features = self.emb_atten_cat(embs)
-            
-
-            after_features = self.fusion(embs)
-            features = self.activation(after_features)
-        else:
-            features = self.activation(features)
-            outputs.append(features)
-
-        layer_outputs = []
-        for l in range(1):
-            outputs.append(features)
-        outputs = torch.cat(outputs, dim=-1)
-        final_outputs = outputs
-        return final_outputs
-
-class MultiModalFusion(nn.Module):
-    def __init__(self, modal_num, with_weight=1):
-        super().__init__()
-        self.modal_num = modal_num
-        self.requires_grad = True if with_weight > 0 else False
-        self.weight = nn.Parameter(
-            torch.ones((self.modal_num, 1)), requires_grad=self.requires_grad
-        )
-
-    def forward(self, embs):
-        assert len(embs) == self.modal_num
-        weight_norm = F.softmax(self.weight, dim=0)
-        embs = [
-            weight_norm[idx] * F.normalize(embs[idx])
-            for idx in range(self.modal_num)
-            if embs[idx] is not None
-        ]
-        joint_emb = torch.cat(embs, dim=1)
-        return joint_emb
 
 class MultiModalEncoderMrFusion(nn.Module):
     """
@@ -244,7 +153,7 @@ class MultiModalEncoderMrFusion(nn.Module):
             nn.init.xavier_uniform_(self.ent_embedding.weight)
             nn.init.xavier_uniform_(self.rel_embedding.weight)
 
-            self.e_encoder = MrFusionGraphAttention(
+            self.e_encoder = RRGAT(
                 args=self.args,
                 node_size=self.node_size,
                 rel_size=self.rel_size,
@@ -253,21 +162,24 @@ class MultiModalEncoderMrFusion(nn.Module):
                 depth=self.depth,
                 mr_fusion_type=self.mr_fusion_type,
             )
-            self.joint_encoder = MrFusionGraphAttention1(
+            self.r_encoder = RRGAT(
                 args=self.args,
                 node_size=self.node_size,
                 rel_size=self.rel_size,
                 triple_size=self.triple_size,
                 node_dim=self.node_hidden,
                 depth=self.depth,
-                mr_fusion_type=self.mr_fusion_type,
+                
             )
-        if self.final_fusion_type == 2:
-            self.fusion = MultiModalFusion(
-                modal_num=2, with_weight=self.args.with_weight
+            self.joint_encoder = InteractionMoE(
+                args=self.args
             )
 
+        self.fusion1 = MFusion(args, modal_num=3,
+                                        with_weight=1)
+
         self.MCD = MCD(k=2, alpha=0.7, beta=0.3, x_drop_rate=0., edge_drop_rate=0., z_drop_rate=0.)
+
 
     def avg(self, adj, emb, size: int):
         adj = torch.sparse_coo_tensor(
@@ -304,6 +216,7 @@ class MultiModalEncoderMrFusion(nn.Module):
         else:
             att_emb = None
 
+
         emb_dict = { "relation": rel_emb, "attribute": att_emb, "image": img_emb}
         enhanced_emb_dict = self.MCD(g, emb_dict)
         rel_emb = enhanced_emb_dict['relation']
@@ -315,29 +228,24 @@ class MultiModalEncoderMrFusion(nn.Module):
                 joint_emb = []
                 if img_emb is not None:
                     joint_emb.append(img_emb)
+
                 if rel_emb is not None:
                     joint_emb.append(rel_emb)
+    
                 if att_emb is not None:
                     joint_emb.append(att_emb)
 
-                opt = [
-                    self.rel_embedding.weight,
-                    self.adj_list,
-                    self.r_index,
-                    self.r_val,
-                ]
-                ent_feature = self.avg(
-                    self.ent_adj, self.ent_embedding.weight, self.node_size
-                )
+                ent_feature = self.avg(self.ent_adj, self.ent_embedding.weight, self.node_size)
+                opt = [self.rel_embedding.weight, self.adj_list, self.r_index, self.r_val]
                 gph_emb1=ent_feature
                 gph_emb = self.e_encoder([ent_feature] + opt)
 
                 if self.final_fusion_type == -1:
                     joint_emb = gph_emb
                 else:
-                    joint_emb = self.joint_encoder([None] + opt + [joint_emb])
+                    joint_emb = self.fusion1(joint_emb)
                     joint_emb = torch.cat([gph_emb, joint_emb], dim=-1)
         else:
             gph_emb = None
         name_emb, char_emb = None, None
-        return gph_emb1,gph_emb, img_emb, rel_emb, att_emb, name_emb, char_emb, joint_emb
+        return gph_emb1, gph_emb, img_emb, rel_emb, att_emb, name_emb, char_emb, joint_emb
