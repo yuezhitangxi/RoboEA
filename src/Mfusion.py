@@ -92,11 +92,6 @@ class MFusion(nn.Module):
         self.fusion_layer = nn.ModuleList([BertLayer(args) for _ in range(args.num_hidden_layers)])
         self.type_id = torch.tensor([0, 1, 2, 3, 4, 5]).cuda()
         
-
-    def reset_parameters(self):
-        nn.init.xavier_uniform_(self.fusion_weights)
-        nn.init.zeros_(self.fusion_bias)
-        
     def forward(self, embs):
         embs = [embs[idx] for idx in range(len(embs)) if embs[idx] is not None]
         modal_num = len(embs)
@@ -111,14 +106,9 @@ class MFusion(nn.Module):
         weight_norm = F.softmax(attention_pro_comb, dim=-1)
         embs = [weight_norm[:, idx].unsqueeze(1) * F.normalize(embs[idx]) for idx in range(modal_num)]
         joint_emb = torch.cat(embs, dim=1)
-
-        batch_size = hidden_states.shape[0]
-        modal_num = hidden_states.shape[1]
-        dim = hidden_states.shape[2]
-        hidden_states_reshaped = hidden_states.view(batch_size, modal_num * dim)
         
-
-        return hidden_states_reshaped
+        
+        return joint_emb
 
 class BertSelfAttention(nn.Module):
     def __init__(self, config):
