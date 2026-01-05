@@ -419,11 +419,11 @@ class MyGram:
         )
 
 
-        parser.add_argument("--hidden_size", type=int, default=300, help="the hidden size of MEAformer")
-        parser.add_argument("--intermediate_size", type=int, default=400, help="the hidden size of MEAformer")
-        parser.add_argument("--num_attention_heads", type=int, default=1,
+        parser.add_argument("--hidden_size", type=int, default=300, help="the hidden size of transformer")
+        parser.add_argument("--intermediate_size", type=int, default=400, help="the hidden size of transformer")
+        parser.add_argument("--num_attention_heads", type=int, default=5,
                             help="the number of attention_heads of MEAformer")
-        parser.add_argument("--num_hidden_layers", type=int, default=1, help="the number of hidden_layers of MEAformer")
+        parser.add_argument("--num_hidden_layers", type=int, default=2, help="the number of hidden_layers of transformer")
         parser.add_argument("--position_embedding_type", default="absolute", type=str)
         parser.add_argument("--use_intermediate", type=int, default=1, help="whether to use_intermediate")
         return parser.parse_args()
