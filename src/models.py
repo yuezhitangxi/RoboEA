@@ -40,8 +40,6 @@ class RRGAT(nn.Module):
             nn.init.xavier_uniform_(attn_kernel)
             self.attn_kernels.append(attn_kernel)
         self.modal_num = 3
-        self.emb_atten_cat = MultiModalFusion(self.modal_num)
-
 
     def forward(self, inputs):
         outputs = []
@@ -67,9 +65,9 @@ class RRGAT(nn.Module):
             neighs = features[adj[1, :].long()]
             tri_rel = F.normalize(tri_rel, dim=1, p=2)
 
-            neighs = (
-                neighs - 2 * torch.sum(neighs * tri_rel, dim=1, keepdim=True) * tri_rel
-            )
+            # neighs = (
+            #     neighs - 2 * torch.sum(neighs * tri_rel, dim=1, keepdim=True) * tri_rel
+            # )
 
             att = torch.squeeze(torch.mm(tri_rel, attention_kernel), dim=-1)
             att = torch.sparse_coo_tensor(
@@ -84,9 +82,10 @@ class RRGAT(nn.Module):
             )
             features = self.activation(new_features)
             outputs.append(features)
-        outputs = torch.cat(outputs, dim=-1)
-        final_outputs = outputs
-        return final_outputs
+        # outputs = torch.cat(outputs, dim=-1)
+        # final_outputs = outputs
+        # return final_outputs
+        return torch.cat([outputs[0], outputs[1]], dim=-1)
 
 class MultiModalEncoderMrFusion(nn.Module):
     """
@@ -171,10 +170,6 @@ class MultiModalEncoderMrFusion(nn.Module):
                 depth=self.depth,
                 
             )
-            self.joint_encoder = InteractionMoE(
-                args=self.args
-            )
-
         self.fusion1 = MFusion(args, modal_num=3,
                                         with_weight=1)
 
@@ -219,9 +214,9 @@ class MultiModalEncoderMrFusion(nn.Module):
 
         emb_dict = { "relation": rel_emb, "attribute": att_emb, "image": img_emb}
         enhanced_emb_dict = self.MCD(g, emb_dict)
-        rel_emb = enhanced_emb_dict['relation']
-        att_emb = enhanced_emb_dict['attribute']
-        img_emb = enhanced_emb_dict['image']
+        rel_emb = rel_emb
+        att_emb = att_emb 
+        img_emb = img_emb
 
         if self.args.w_gcn:
             if self.args.structure_encoder == "Dualmodal-joint-LMF":

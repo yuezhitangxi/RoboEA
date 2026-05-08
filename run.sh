@@ -1,4 +1,4 @@
-gpu_id='0'
+gpu_id='1'
 # 'FB15K_DB15K' 'FB15K_YAGO15K' 'zh_en' 'ja_en' 'fr_en'
 dataset='FBDB15K'
 ratio=0.2
@@ -28,17 +28,16 @@ current_datetime=$(date +"%Y-%m-%d-%H-%M")
 head_name=${current_datetime}_${dataset}
 file_name=${head_name}_${ratio}
 echo ${file_name}
-CUDA_VISIBLE_DEVICES=${gpu_id} python3 -u MyGram/src/run.py \
-    --file_dir /${dataset_dir}/${dataset} \
+CUDA_VISIBLE_DEVICES=${gpu_id} python3 -u src/run.py \
+    --file_dir data/${dataset_dir}/${dataset}/norm \
     --pred_name ${file_name} \
     --rate ${ratio} \
     --lr .0005 \
-    --epochs 1000 \
+    --epochs 500 \
     --dropout ${dropout} \
     --hidden_units "300,300,300" \
     --check_point 50  \
     --bsize ${bsize} \
-    --il \
     --il_start ${il_start} \
     --semi_learn_step 5 \
     --csls \

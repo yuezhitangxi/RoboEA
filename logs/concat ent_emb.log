@@ -1,0 +1,4277 @@
+27793 1625
+node_size:	 27793
+rel_size:	 3250
+triple_size:	 666281
+loading raw data...
+total ent num: 27793, rel num: 1624
+94.56% entities have images,  follow_neirbor_img_num is 1462,  follow_all_img_num is 50
+image feature shape: torch.Size([27793, 4096])
+#left entity : 14951, #right entity: 12842
+#left entity not in train set: 12382, #right entity not in train set: 10273
+relation feature shape: torch.Size([27793, 1000])
+attribute feature shape: torch.Size([27793, 1000])
+Generating a dense adjacency matrix...
+total params num 13325306
+MyGram model details:
+MultiModalEncoderMrFusion(
+  (rel_fc): Linear(in_features=1000, out_features=300, bias=True)
+  (att_fc): Linear(in_features=1000, out_features=300, bias=True)
+  (img_fc): Linear(in_features=4096, out_features=300, bias=True)
+  (dropout): Dropout(p=0.0, inplace=False)
+  (ent_embedding): Embedding(27793, 300)
+  (rel_embedding): Embedding(3250, 300)
+  (rel_fc_dual): Linear(in_features=3250, out_features=300, bias=True)
+  (e_encoder): RRGAT(
+    (activation): Tanh()
+    (attn_kernels): ParameterList(
+        (0): Parameter containing: [torch.float32 of size 300x1 (cuda:0)]
+        (1): Parameter containing: [torch.float32 of size 300x1 (cuda:0)]
+    )
+  )
+  (r_encoder): RRGAT(
+    (activation): Tanh()
+    (attn_kernels): ParameterList(
+        (0): Parameter containing: [torch.float32 of size 300x1 (cuda:0)]
+        (1): Parameter containing: [torch.float32 of size 300x1 (cuda:0)]
+    )
+  )
+  (fusion1): MFusion(
+    (fusion_layer): ModuleList(
+      (0-1): 2 x BertLayer(
+        (attention): BertAttention(
+          (self): BertSelfAttention(
+            (query): Linear(in_features=300, out_features=300, bias=True)
+            (key): Linear(in_features=300, out_features=300, bias=True)
+            (value): Linear(in_features=300, out_features=300, bias=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+          )
+          (output): BertSelfOutput(
+            (dense): Linear(in_features=300, out_features=300, bias=True)
+            (LayerNorm): LayerNorm((300,), eps=1e-12, elementwise_affine=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+          )
+        )
+        (intermediate): BertIntermediate(
+          (dense): Linear(in_features=300, out_features=400, bias=True)
+          (intermediate_act_fn): GELUActivation()
+        )
+        (output): BertOutput(
+          (dense): Linear(in_features=400, out_features=300, bias=True)
+          (LayerNorm): LayerNorm((300,), eps=1e-12, elementwise_affine=True)
+          (dropout): Dropout(p=0.1, inplace=False)
+        )
+      )
+    )
+  )
+  (MCD): MCD(
+    (x_dropout): Dropout(p=0.0, inplace=False)
+    (edge_dropout): Dropout(p=0.0, inplace=False)
+    (z_dropout): Dropout(p=0.0, inplace=False)
+  )
+)
+optimiser details:
+AdamW (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.0005
+    maximize: False
+    weight_decay: 0.01
+)
+-----dataset summary-----
+dataset:	 data/mmkg/FBDB15K/norm
+triple num:	 691241
+entity num:	 27793
+relation num:	 1624
+train ill num:	 2569 	test ill num:	 10277
+-------------------------
+model config is:
+Namespace(file_dir='data/mmkg/FBDB15K/norm', rate=0.2, cuda=True, seed=2023, epochs=500, check_point=50, hidden_units='300,300,300', heads='2,2', instance_normalization=False, lr=0.0005, weight_decay=0, dropout=0.0, attn_dropout=0.0, dist=2, csls=True, csls_k=3, il=False, semi_learn_step=5, il_start=50, bsize=3500, unsup=False, unsup_mode='img', unsup_k=1000, lta_split=0, tau=0.1, tau2=4.0, alpha=0.2, with_weight=1, structure_encoder='Dualmodal-joint-LMF', ab_weight=0.5, projection=False, attr_dim=300, img_dim=300, name_dim=100, char_dim=100, w_gcn=True, w_rel=True, w_attr=True, w_name=False, w_char=False, w_img=True, inner_view_num=6, word_embedding='glove', use_project_head=False, zoom=0.1, reduction='mean', save_path='save_pkl', pred_name='2026-05-07-00-42_FBDB15K_0.2', img_dp_ratio=1.0, ms_alpha=0.1, ms_beta=40.0, ms_base=0.5, bi_adapter=True, adapter_choice=0, use_mean_img=True, use_zero_img=False, use_ms_loss=True, use_sheduler=False, sheduler_gamma=0.98, use_sheduler_cos=False, num_warmup_steps=200, num_training_steps=1000, cl_use_bce=False, joint_use_nce=True, joint_use_bce=False, joint_use_icl=False, use_joint_loss=True, Dual_num_layer=1, fusion_type='attention', joint_type=1, use_proxy=True, LMFrank=8, use_GphForward=1, use_simple_lr=False, add_other_modal=0, fusion_beta=0.0, Is_LMFSoftmax=0, mr_fusion_type=7, final_fusion_type=0, hidden_size=300, intermediate_size=400, num_attention_heads=5, num_hidden_layers=2, position_embedding_type='absolute', use_intermediate=1)
+[start training...] 
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 7.740747, loss_all: 7.740747,
+[epoch 0] loss_all: 7.740747
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 7.187025, loss_all: 7.187025,
+[epoch 1] loss_all: 7.187025
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 6.877871, loss_all: 6.877871,
+[epoch 2] loss_all: 6.877871
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 6.559958, loss_all: 6.559958,
+[epoch 3] loss_all: 6.559958
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 6.253815, loss_all: 6.253815,
+[epoch 4] loss_all: 6.253815
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 5.998060, loss_all: 5.998060,
+[epoch 5] loss_all: 5.998060
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 5.780266, loss_all: 5.780266,
+[epoch 6] loss_all: 5.780266
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 5.577572, loss_all: 5.577572,
+[epoch 7] loss_all: 5.577572
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 5.387023, loss_all: 5.387023,
+[epoch 8] loss_all: 5.387023
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 5.195272, loss_all: 5.195272,
+[epoch 9] loss_all: 5.195272
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 5.024260, loss_all: 5.024260,
+[epoch 10] loss_all: 5.024260
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 4.842553, loss_all: 4.842553,
+[epoch 11] loss_all: 4.842553
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 4.660224, loss_all: 4.660224,
+[epoch 12] loss_all: 4.660224
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 4.488253, loss_all: 4.488253,
+[epoch 13] loss_all: 4.488253
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 4.316480, loss_all: 4.316480,
+[epoch 14] loss_all: 4.316480
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 4.140232, loss_all: 4.140232,
+[epoch 15] loss_all: 4.140232
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.972743, loss_all: 3.972743,
+[epoch 16] loss_all: 3.972743
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.816625, loss_all: 3.816625,
+[epoch 17] loss_all: 3.816625
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.656229, loss_all: 3.656229,
+[epoch 18] loss_all: 3.656229
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.506647, loss_all: 3.506647,
+[epoch 19] loss_all: 3.506647
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.357584, loss_all: 3.357584,
+[epoch 20] loss_all: 3.357584
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.211119, loss_all: 3.211119,
+[epoch 21] loss_all: 3.211119
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.073083, loss_all: 3.073083,
+[epoch 22] loss_all: 3.073083
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.943496, loss_all: 2.943496,
+[epoch 23] loss_all: 2.943496
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.819889, loss_all: 2.819889,
+[epoch 24] loss_all: 2.819889
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.707196, loss_all: 2.707196,
+[epoch 25] loss_all: 2.707196
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.602945, loss_all: 2.602945,
+[epoch 26] loss_all: 2.602945
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.483517, loss_all: 2.483517,
+[epoch 27] loss_all: 2.483517
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.383221, loss_all: 2.383221,
+[epoch 28] loss_all: 2.383221
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.275259, loss_all: 2.275259,
+[epoch 29] loss_all: 2.275259
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.203978, loss_all: 2.203978,
+[epoch 30] loss_all: 2.203978
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.115948, loss_all: 2.115948,
+[epoch 31] loss_all: 2.115948
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.023150, loss_all: 2.023150,
+[epoch 32] loss_all: 2.023150
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.951183, loss_all: 1.951183,
+[epoch 33] loss_all: 1.951183
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.872387, loss_all: 1.872387,
+[epoch 34] loss_all: 1.872387
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.796290, loss_all: 1.796290,
+[epoch 35] loss_all: 1.796290
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.727446, loss_all: 1.727446,
+[epoch 36] loss_all: 1.727446
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.665066, loss_all: 1.665066,
+[epoch 37] loss_all: 1.665066
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.604003, loss_all: 1.604003,
+[epoch 38] loss_all: 1.604003
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.537537, loss_all: 1.537537,
+[epoch 39] loss_all: 1.537537
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.486544, loss_all: 1.486544,
+[epoch 40] loss_all: 1.486544
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.424109, loss_all: 1.424109,
+[epoch 41] loss_all: 1.424109
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.378833, loss_all: 1.378833,
+[epoch 42] loss_all: 1.378833
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.327722, loss_all: 1.327722,
+[epoch 43] loss_all: 1.327722
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.278673, loss_all: 1.278673,
+[epoch 44] loss_all: 1.278673
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.236948, loss_all: 1.236948,
+[epoch 45] loss_all: 1.236948
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.200265, loss_all: 1.200265,
+[epoch 46] loss_all: 1.200265
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.153960, loss_all: 1.153960,
+[epoch 47] loss_all: 1.153960
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.124871, loss_all: 1.124871,
+[epoch 48] loss_all: 1.124871
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.080332, loss_all: 1.080332,
+[epoch 49] loss_all: 1.080332
+
+[epoch 49] checkpoint!
+inner-view loss weights: tensor([1., 1., 1., 1., 1., 1.], device='cuda:0')
+l2r: acc of top [1, 10, 50] = [0.0471 0.1469 0.279 ], mr = 1484.837, mrr = 0.082, time = 3.5819 s 
+r2l: acc of top [1, 10, 50] = [0.0448 0.1444 0.2788], mr = 1476.808, mrr = 0.080, time = 3.5822 s 
+
+AdamW (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.0005
+    maximize: False
+    weight_decay: 0.01
+)
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.047135, loss_all: 1.047135,
+[epoch 50] loss_all: 1.047135
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 5.320383, loss_all: 5.320383,
+[epoch 51] loss_all: 5.320383
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.540629, loss_all: 1.540629,
+[epoch 52] loss_all: 1.540629
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 4.832062, loss_all: 4.832062,
+[epoch 53] loss_all: 4.832062
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.537174, loss_all: 1.537174,
+[epoch 54] loss_all: 1.537174
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 4.506297, loss_all: 4.506297,
+[epoch 55] loss_all: 4.506297
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.529373, loss_all: 1.529373,
+[epoch 56] loss_all: 1.529373
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 4.320308, loss_all: 4.320308,
+[epoch 57] loss_all: 4.320308
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.523515, loss_all: 1.523515,
+[epoch 58] loss_all: 1.523515
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 4.152766, loss_all: 4.152766,
+[epoch 59] loss_all: 4.152766
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.492431, loss_all: 1.492431,
+[epoch 60] loss_all: 1.492431
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.959941, loss_all: 3.959941,
+[epoch 61] loss_all: 3.959941
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.586140, loss_all: 1.586140,
+[epoch 62] loss_all: 1.586140
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.793939, loss_all: 3.793939,
+[epoch 63] loss_all: 3.793939
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.599462, loss_all: 1.599462,
+[epoch 64] loss_all: 1.599462
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.587790, loss_all: 3.587790,
+[epoch 65] loss_all: 3.587790
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.602633, loss_all: 1.602633,
+[epoch 66] loss_all: 1.602633
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.400121, loss_all: 3.400121,
+[epoch 67] loss_all: 3.400121
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.547490, loss_all: 1.547490,
+[epoch 68] loss_all: 1.547490
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.229063, loss_all: 3.229063,
+[epoch 69] loss_all: 3.229063
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.548144, loss_all: 1.548144,
+[epoch 70] loss_all: 1.548144
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 3.084501, loss_all: 3.084501,
+[epoch 71] loss_all: 3.084501
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.521316, loss_all: 1.521316,
+[epoch 72] loss_all: 1.521316
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.959535, loss_all: 2.959535,
+[epoch 73] loss_all: 2.959535
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.470324, loss_all: 1.470324,
+[epoch 74] loss_all: 1.470324
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.856096, loss_all: 2.856096,
+[epoch 75] loss_all: 2.856096
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.434386, loss_all: 1.434386,
+[epoch 76] loss_all: 1.434386
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.769309, loss_all: 2.769309,
+[epoch 77] loss_all: 2.769309
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.384838, loss_all: 1.384838,
+[epoch 78] loss_all: 1.384838
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.687132, loss_all: 2.687132,
+[epoch 79] loss_all: 2.687132
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.358895, loss_all: 1.358895,
+[epoch 80] loss_all: 1.358895
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.620121, loss_all: 2.620121,
+[epoch 81] loss_all: 2.620121
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.308728, loss_all: 1.308728,
+[epoch 82] loss_all: 1.308728
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.544342, loss_all: 2.544342,
+[epoch 83] loss_all: 2.544342
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.268221, loss_all: 1.268221,
+[epoch 84] loss_all: 1.268221
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.485046, loss_all: 2.485046,
+[epoch 85] loss_all: 2.485046
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.228122, loss_all: 1.228122,
+[epoch 86] loss_all: 1.228122
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.412759, loss_all: 2.412759,
+[epoch 87] loss_all: 2.412759
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.193308, loss_all: 1.193308,
+[epoch 88] loss_all: 1.193308
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.359362, loss_all: 2.359362,
+[epoch 89] loss_all: 2.359362
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.156570, loss_all: 1.156570,
+[epoch 90] loss_all: 1.156570
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.299067, loss_all: 2.299067,
+[epoch 91] loss_all: 2.299067
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.128883, loss_all: 1.128883,
+[epoch 92] loss_all: 1.128883
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.245677, loss_all: 2.245677,
+[epoch 93] loss_all: 2.245677
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.101520, loss_all: 1.101520,
+[epoch 94] loss_all: 1.101520
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.207940, loss_all: 2.207940,
+[epoch 95] loss_all: 2.207940
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.081370, loss_all: 1.081370,
+[epoch 96] loss_all: 1.081370
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.132306, loss_all: 2.132306,
+[epoch 97] loss_all: 2.132306
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.057857, loss_all: 1.057857,
+[epoch 98] loss_all: 1.057857
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.095915, loss_all: 2.095915,
+[epoch 99] loss_all: 2.095915
+
+[epoch 99] checkpoint!
+inner-view loss weights: tensor([1., 1., 1., 1., 1., 1.], device='cuda:0')
+l2r: acc of top [1, 10, 50] = [0.1342 0.3287 0.5387], mr = 333.178, mrr = 0.201, time = 3.4725 s 
+r2l: acc of top [1, 10, 50] = [0.139  0.339  0.5371], mr = 331.925, mrr = 0.206, time = 3.4729 s 
+
+AdamW (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.0005
+    maximize: False
+    weight_decay: 0.01
+)
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.025390, loss_all: 1.025390,
+[epoch 100] loss_all: 1.025390
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.047814, loss_all: 2.047814,
+[epoch 101] loss_all: 2.047814
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.008919, loss_all: 1.008919,
+[epoch 102] loss_all: 1.008919
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.001479, loss_all: 2.001479,
+[epoch 103] loss_all: 2.001479
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.985064, loss_all: 0.985064,
+[epoch 104] loss_all: 0.985064
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.957225, loss_all: 1.957225,
+[epoch 105] loss_all: 1.957225
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.985287, loss_all: 0.985287,
+[epoch 106] loss_all: 0.985287
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.894171, loss_all: 1.894171,
+[epoch 107] loss_all: 1.894171
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.972506, loss_all: 0.972506,
+[epoch 108] loss_all: 0.972506
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.868428, loss_all: 1.868428,
+[epoch 109] loss_all: 1.868428
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.957790, loss_all: 0.957790,
+[epoch 110] loss_all: 0.957790
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.867745, loss_all: 1.867745,
+[epoch 111] loss_all: 1.867745
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.276323, loss_all: 1.276323,
+[epoch 112] loss_all: 1.276323
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 2.598631, loss_all: 2.598631,
+[epoch 113] loss_all: 2.598631
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.230121, loss_all: 1.230121,
+[epoch 114] loss_all: 1.230121
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.746518, loss_all: 1.746518,
+[epoch 115] loss_all: 1.746518
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.272188, loss_all: 1.272188,
+[epoch 116] loss_all: 1.272188
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.750852, loss_all: 1.750852,
+[epoch 117] loss_all: 1.750852
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.219930, loss_all: 1.219930,
+[epoch 118] loss_all: 1.219930
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.520560, loss_all: 1.520560,
+[epoch 119] loss_all: 1.520560
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.179952, loss_all: 1.179952,
+[epoch 120] loss_all: 1.179952
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.429291, loss_all: 1.429291,
+[epoch 121] loss_all: 1.429291
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.168795, loss_all: 1.168795,
+[epoch 122] loss_all: 1.168795
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.386567, loss_all: 1.386567,
+[epoch 123] loss_all: 1.386567
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.136263, loss_all: 1.136263,
+[epoch 124] loss_all: 1.136263
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.346033, loss_all: 1.346033,
+[epoch 125] loss_all: 1.346033
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.108627, loss_all: 1.108627,
+[epoch 126] loss_all: 1.108627
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.318665, loss_all: 1.318665,
+[epoch 127] loss_all: 1.318665
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.085882, loss_all: 1.085882,
+[epoch 128] loss_all: 1.085882
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.281917, loss_all: 1.281917,
+[epoch 129] loss_all: 1.281917
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.063925, loss_all: 1.063925,
+[epoch 130] loss_all: 1.063925
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.250391, loss_all: 1.250391,
+[epoch 131] loss_all: 1.250391
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.030450, loss_all: 1.030450,
+[epoch 132] loss_all: 1.030450
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.222146, loss_all: 1.222146,
+[epoch 133] loss_all: 1.222146
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.016737, loss_all: 1.016737,
+[epoch 134] loss_all: 1.016737
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.198303, loss_all: 1.198303,
+[epoch 135] loss_all: 1.198303
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.993908, loss_all: 0.993908,
+[epoch 136] loss_all: 0.993908
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.169990, loss_all: 1.169990,
+[epoch 137] loss_all: 1.169990
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.965625, loss_all: 0.965625,
+[epoch 138] loss_all: 0.965625
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.145830, loss_all: 1.145830,
+[epoch 139] loss_all: 1.145830
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.947703, loss_all: 0.947703,
+[epoch 140] loss_all: 0.947703
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.120527, loss_all: 1.120527,
+[epoch 141] loss_all: 1.120527
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.923618, loss_all: 0.923618,
+[epoch 142] loss_all: 0.923618
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.102013, loss_all: 1.102013,
+[epoch 143] loss_all: 1.102013
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.902506, loss_all: 0.902506,
+[epoch 144] loss_all: 0.902506
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.077341, loss_all: 1.077341,
+[epoch 145] loss_all: 1.077341
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.884419, loss_all: 0.884419,
+[epoch 146] loss_all: 0.884419
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.048054, loss_all: 1.048054,
+[epoch 147] loss_all: 1.048054
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.869183, loss_all: 0.869183,
+[epoch 148] loss_all: 0.869183
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.034554, loss_all: 1.034554,
+[epoch 149] loss_all: 1.034554
+
+[epoch 149] checkpoint!
+inner-view loss weights: tensor([1., 1., 1., 1., 1., 1.], device='cuda:0')
+l2r: acc of top [1, 10, 50] = [0.2603 0.521  0.717 ], mr = 140.444, mrr = 0.348, time = 3.4763 s 
+r2l: acc of top [1, 10, 50] = [0.2644 0.5262 0.7202], mr = 145.015, mrr = 0.353, time = 3.4767 s 
+
+AdamW (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.0005
+    maximize: False
+    weight_decay: 0.01
+)
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.858450, loss_all: 0.858450,
+[epoch 150] loss_all: 0.858450
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 1.006571, loss_all: 1.006571,
+[epoch 151] loss_all: 1.006571
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.845527, loss_all: 0.845527,
+[epoch 152] loss_all: 0.845527
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.984440, loss_all: 0.984440,
+[epoch 153] loss_all: 0.984440
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.827519, loss_all: 0.827519,
+[epoch 154] loss_all: 0.827519
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.966565, loss_all: 0.966565,
+[epoch 155] loss_all: 0.966565
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.805492, loss_all: 0.805492,
+[epoch 156] loss_all: 0.805492
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.947235, loss_all: 0.947235,
+[epoch 157] loss_all: 0.947235
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.791140, loss_all: 0.791140,
+[epoch 158] loss_all: 0.791140
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.929159, loss_all: 0.929159,
+[epoch 159] loss_all: 0.929159
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.774553, loss_all: 0.774553,
+[epoch 160] loss_all: 0.774553
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.911149, loss_all: 0.911149,
+[epoch 161] loss_all: 0.911149
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.762357, loss_all: 0.762357,
+[epoch 162] loss_all: 0.762357
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.897967, loss_all: 0.897967,
+[epoch 163] loss_all: 0.897967
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.744593, loss_all: 0.744593,
+[epoch 164] loss_all: 0.744593
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.879242, loss_all: 0.879242,
+[epoch 165] loss_all: 0.879242
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.730113, loss_all: 0.730113,
+[epoch 166] loss_all: 0.730113
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.861040, loss_all: 0.861040,
+[epoch 167] loss_all: 0.861040
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.717783, loss_all: 0.717783,
+[epoch 168] loss_all: 0.717783
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.846054, loss_all: 0.846054,
+[epoch 169] loss_all: 0.846054
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.702500, loss_all: 0.702500,
+[epoch 170] loss_all: 0.702500
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.829036, loss_all: 0.829036,
+[epoch 171] loss_all: 0.829036
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.692130, loss_all: 0.692130,
+[epoch 172] loss_all: 0.692130
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.811578, loss_all: 0.811578,
+[epoch 173] loss_all: 0.811578
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.675770, loss_all: 0.675770,
+[epoch 174] loss_all: 0.675770
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.802890, loss_all: 0.802890,
+[epoch 175] loss_all: 0.802890
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.665618, loss_all: 0.665618,
+[epoch 176] loss_all: 0.665618
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.787904, loss_all: 0.787904,
+[epoch 177] loss_all: 0.787904
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.668289, loss_all: 0.668289,
+[epoch 178] loss_all: 0.668289
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.764793, loss_all: 0.764793,
+[epoch 179] loss_all: 0.764793
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.649736, loss_all: 0.649736,
+[epoch 180] loss_all: 0.649736
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.751504, loss_all: 0.751504,
+[epoch 181] loss_all: 0.751504
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.637808, loss_all: 0.637808,
+[epoch 182] loss_all: 0.637808
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.739413, loss_all: 0.739413,
+[epoch 183] loss_all: 0.739413
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.629805, loss_all: 0.629805,
+[epoch 184] loss_all: 0.629805
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.724863, loss_all: 0.724863,
+[epoch 185] loss_all: 0.724863
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.615673, loss_all: 0.615673,
+[epoch 186] loss_all: 0.615673
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.716123, loss_all: 0.716123,
+[epoch 187] loss_all: 0.716123
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.605348, loss_all: 0.605348,
+[epoch 188] loss_all: 0.605348
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.703903, loss_all: 0.703903,
+[epoch 189] loss_all: 0.703903
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.593946, loss_all: 0.593946,
+[epoch 190] loss_all: 0.593946
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.689867, loss_all: 0.689867,
+[epoch 191] loss_all: 0.689867
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.581392, loss_all: 0.581392,
+[epoch 192] loss_all: 0.581392
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.682016, loss_all: 0.682016,
+[epoch 193] loss_all: 0.682016
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.571281, loss_all: 0.571281,
+[epoch 194] loss_all: 0.571281
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.669639, loss_all: 0.669639,
+[epoch 195] loss_all: 0.669639
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.568877, loss_all: 0.568877,
+[epoch 196] loss_all: 0.568877
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.656954, loss_all: 0.656954,
+[epoch 197] loss_all: 0.656954
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.559975, loss_all: 0.559975,
+[epoch 198] loss_all: 0.559975
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.642889, loss_all: 0.642889,
+[epoch 199] loss_all: 0.642889
+
+[epoch 199] checkpoint!
+inner-view loss weights: tensor([1., 1., 1., 1., 1., 1.], device='cuda:0')
+l2r: acc of top [1, 10, 50] = [0.3287 0.6063 0.7726], mr = 120.873, mrr = 0.422, time = 3.4747 s 
+r2l: acc of top [1, 10, 50] = [0.3424 0.609  0.78  ], mr = 110.825, mrr = 0.433, time = 3.4751 s 
+
+AdamW (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.0005
+    maximize: False
+    weight_decay: 0.01
+)
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.552098, loss_all: 0.552098,
+[epoch 200] loss_all: 0.552098
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.637778, loss_all: 0.637778,
+[epoch 201] loss_all: 0.637778
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.538240, loss_all: 0.538240,
+[epoch 202] loss_all: 0.538240
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.624279, loss_all: 0.624279,
+[epoch 203] loss_all: 0.624279
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.533946, loss_all: 0.533946,
+[epoch 204] loss_all: 0.533946
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.613764, loss_all: 0.613764,
+[epoch 205] loss_all: 0.613764
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.522712, loss_all: 0.522712,
+[epoch 206] loss_all: 0.522712
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.602950, loss_all: 0.602950,
+[epoch 207] loss_all: 0.602950
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.516369, loss_all: 0.516369,
+[epoch 208] loss_all: 0.516369
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.591657, loss_all: 0.591657,
+[epoch 209] loss_all: 0.591657
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.507526, loss_all: 0.507526,
+[epoch 210] loss_all: 0.507526
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.582848, loss_all: 0.582848,
+[epoch 211] loss_all: 0.582848
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.501523, loss_all: 0.501523,
+[epoch 212] loss_all: 0.501523
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.580196, loss_all: 0.580196,
+[epoch 213] loss_all: 0.580196
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.493537, loss_all: 0.493537,
+[epoch 214] loss_all: 0.493537
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.567320, loss_all: 0.567320,
+[epoch 215] loss_all: 0.567320
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.487486, loss_all: 0.487486,
+[epoch 216] loss_all: 0.487486
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.556743, loss_all: 0.556743,
+[epoch 217] loss_all: 0.556743
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.480400, loss_all: 0.480400,
+[epoch 218] loss_all: 0.480400
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.556226, loss_all: 0.556226,
+[epoch 219] loss_all: 0.556226
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.473590, loss_all: 0.473590,
+[epoch 220] loss_all: 0.473590
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.544487, loss_all: 0.544487,
+[epoch 221] loss_all: 0.544487
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.468078, loss_all: 0.468078,
+[epoch 222] loss_all: 0.468078
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.535797, loss_all: 0.535797,
+[epoch 223] loss_all: 0.535797
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.460461, loss_all: 0.460461,
+[epoch 224] loss_all: 0.460461
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.527282, loss_all: 0.527282,
+[epoch 225] loss_all: 0.527282
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.454461, loss_all: 0.454461,
+[epoch 226] loss_all: 0.454461
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.518675, loss_all: 0.518675,
+[epoch 227] loss_all: 0.518675
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.447874, loss_all: 0.447874,
+[epoch 228] loss_all: 0.447874
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.514282, loss_all: 0.514282,
+[epoch 229] loss_all: 0.514282
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.441355, loss_all: 0.441355,
+[epoch 230] loss_all: 0.441355
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.508428, loss_all: 0.508428,
+[epoch 231] loss_all: 0.508428
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.435574, loss_all: 0.435574,
+[epoch 232] loss_all: 0.435574
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.500705, loss_all: 0.500705,
+[epoch 233] loss_all: 0.500705
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.431258, loss_all: 0.431258,
+[epoch 234] loss_all: 0.431258
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.491087, loss_all: 0.491087,
+[epoch 235] loss_all: 0.491087
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.424586, loss_all: 0.424586,
+[epoch 236] loss_all: 0.424586
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.488213, loss_all: 0.488213,
+[epoch 237] loss_all: 0.488213
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.419630, loss_all: 0.419630,
+[epoch 238] loss_all: 0.419630
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.479718, loss_all: 0.479718,
+[epoch 239] loss_all: 0.479718
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.413852, loss_all: 0.413852,
+[epoch 240] loss_all: 0.413852
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.473111, loss_all: 0.473111,
+[epoch 241] loss_all: 0.473111
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.408275, loss_all: 0.408275,
+[epoch 242] loss_all: 0.408275
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.468858, loss_all: 0.468858,
+[epoch 243] loss_all: 0.468858
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.404903, loss_all: 0.404903,
+[epoch 244] loss_all: 0.404903
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.457961, loss_all: 0.457961,
+[epoch 245] loss_all: 0.457961
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.400750, loss_all: 0.400750,
+[epoch 246] loss_all: 0.400750
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.450787, loss_all: 0.450787,
+[epoch 247] loss_all: 0.450787
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.392903, loss_all: 0.392903,
+[epoch 248] loss_all: 0.392903
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.449846, loss_all: 0.449846,
+[epoch 249] loss_all: 0.449846
+
+[epoch 249] checkpoint!
+inner-view loss weights: tensor([1., 1., 1., 1., 1., 1.], device='cuda:0')
+l2r: acc of top [1, 10, 50] = [0.3744 0.6513 0.8061], mr = 107.626, mrr = 0.469, time = 3.4792 s 
+r2l: acc of top [1, 10, 50] = [0.3906 0.6572 0.815 ], mr = 97.111, mrr = 0.481, time = 3.4795 s 
+
+AdamW (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.0005
+    maximize: False
+    weight_decay: 0.01
+)
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.388446, loss_all: 0.388446,
+[epoch 250] loss_all: 0.388446
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.440059, loss_all: 0.440059,
+[epoch 251] loss_all: 0.440059
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.384461, loss_all: 0.384461,
+[epoch 252] loss_all: 0.384461
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.435776, loss_all: 0.435776,
+[epoch 253] loss_all: 0.435776
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.380466, loss_all: 0.380466,
+[epoch 254] loss_all: 0.380466
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.433002, loss_all: 0.433002,
+[epoch 255] loss_all: 0.433002
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.377441, loss_all: 0.377441,
+[epoch 256] loss_all: 0.377441
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.426524, loss_all: 0.426524,
+[epoch 257] loss_all: 0.426524
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.372162, loss_all: 0.372162,
+[epoch 258] loss_all: 0.372162
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.420289, loss_all: 0.420289,
+[epoch 259] loss_all: 0.420289
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.368241, loss_all: 0.368241,
+[epoch 260] loss_all: 0.368241
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.415776, loss_all: 0.415776,
+[epoch 261] loss_all: 0.415776
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.363485, loss_all: 0.363485,
+[epoch 262] loss_all: 0.363485
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.411064, loss_all: 0.411064,
+[epoch 263] loss_all: 0.411064
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.359549, loss_all: 0.359549,
+[epoch 264] loss_all: 0.359549
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.408780, loss_all: 0.408780,
+[epoch 265] loss_all: 0.408780
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.353727, loss_all: 0.353727,
+[epoch 266] loss_all: 0.353727
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.402884, loss_all: 0.402884,
+[epoch 267] loss_all: 0.402884
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.350321, loss_all: 0.350321,
+[epoch 268] loss_all: 0.350321
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.399068, loss_all: 0.399068,
+[epoch 269] loss_all: 0.399068
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.346981, loss_all: 0.346981,
+[epoch 270] loss_all: 0.346981
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.392439, loss_all: 0.392439,
+[epoch 271] loss_all: 0.392439
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.342862, loss_all: 0.342862,
+[epoch 272] loss_all: 0.342862
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.389063, loss_all: 0.389063,
+[epoch 273] loss_all: 0.389063
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.341236, loss_all: 0.341236,
+[epoch 274] loss_all: 0.341236
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.382077, loss_all: 0.382077,
+[epoch 275] loss_all: 0.382077
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.335717, loss_all: 0.335717,
+[epoch 276] loss_all: 0.335717
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.377084, loss_all: 0.377084,
+[epoch 277] loss_all: 0.377084
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.333004, loss_all: 0.333004,
+[epoch 278] loss_all: 0.333004
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.376224, loss_all: 0.376224,
+[epoch 279] loss_all: 0.376224
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.329016, loss_all: 0.329016,
+[epoch 280] loss_all: 0.329016
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.370487, loss_all: 0.370487,
+[epoch 281] loss_all: 0.370487
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.326885, loss_all: 0.326885,
+[epoch 282] loss_all: 0.326885
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.365897, loss_all: 0.365897,
+[epoch 283] loss_all: 0.365897
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.321605, loss_all: 0.321605,
+[epoch 284] loss_all: 0.321605
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.366013, loss_all: 0.366013,
+[epoch 285] loss_all: 0.366013
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.319424, loss_all: 0.319424,
+[epoch 286] loss_all: 0.319424
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.358283, loss_all: 0.358283,
+[epoch 287] loss_all: 0.358283
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.317492, loss_all: 0.317492,
+[epoch 288] loss_all: 0.317492
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.354413, loss_all: 0.354413,
+[epoch 289] loss_all: 0.354413
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.312550, loss_all: 0.312550,
+[epoch 290] loss_all: 0.312550
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.350495, loss_all: 0.350495,
+[epoch 291] loss_all: 0.350495
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.310407, loss_all: 0.310407,
+[epoch 292] loss_all: 0.310407
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.349511, loss_all: 0.349511,
+[epoch 293] loss_all: 0.349511
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.306882, loss_all: 0.306882,
+[epoch 294] loss_all: 0.306882
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.346955, loss_all: 0.346955,
+[epoch 295] loss_all: 0.346955
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.306137, loss_all: 0.306137,
+[epoch 296] loss_all: 0.306137
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.340706, loss_all: 0.340706,
+[epoch 297] loss_all: 0.340706
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.302197, loss_all: 0.302197,
+[epoch 298] loss_all: 0.302197
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.342121, loss_all: 0.342121,
+[epoch 299] loss_all: 0.342121
+
+[epoch 299] checkpoint!
+inner-view loss weights: tensor([1., 1., 1., 1., 1., 1.], device='cuda:0')
+l2r: acc of top [1, 10, 50] = [0.4022 0.6763 0.8195], mr = 107.110, mrr = 0.496, time = 3.4794 s 
+r2l: acc of top [1, 10, 50] = [0.4213 0.6815 0.8249], mr = 95.330, mrr = 0.511, time = 3.4797 s 
+
+AdamW (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.0005
+    maximize: False
+    weight_decay: 0.01
+)
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.299461, loss_all: 0.299461,
+[epoch 300] loss_all: 0.299461
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.335343, loss_all: 0.335343,
+[epoch 301] loss_all: 0.335343
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.294056, loss_all: 0.294056,
+[epoch 302] loss_all: 0.294056
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.329919, loss_all: 0.329919,
+[epoch 303] loss_all: 0.329919
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.293520, loss_all: 0.293520,
+[epoch 304] loss_all: 0.293520
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.326631, loss_all: 0.326631,
+[epoch 305] loss_all: 0.326631
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.289674, loss_all: 0.289674,
+[epoch 306] loss_all: 0.289674
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.324666, loss_all: 0.324666,
+[epoch 307] loss_all: 0.324666
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.292274, loss_all: 0.292274,
+[epoch 308] loss_all: 0.292274
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.320264, loss_all: 0.320264,
+[epoch 309] loss_all: 0.320264
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.288867, loss_all: 0.288867,
+[epoch 310] loss_all: 0.288867
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.316991, loss_all: 0.316991,
+[epoch 311] loss_all: 0.316991
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.284034, loss_all: 0.284034,
+[epoch 312] loss_all: 0.284034
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.314488, loss_all: 0.314488,
+[epoch 313] loss_all: 0.314488
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.281056, loss_all: 0.281056,
+[epoch 314] loss_all: 0.281056
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.312961, loss_all: 0.312961,
+[epoch 315] loss_all: 0.312961
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.278869, loss_all: 0.278869,
+[epoch 316] loss_all: 0.278869
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.307818, loss_all: 0.307818,
+[epoch 317] loss_all: 0.307818
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.277686, loss_all: 0.277686,
+[epoch 318] loss_all: 0.277686
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.306259, loss_all: 0.306259,
+[epoch 319] loss_all: 0.306259
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.274139, loss_all: 0.274139,
+[epoch 320] loss_all: 0.274139
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.304804, loss_all: 0.304804,
+[epoch 321] loss_all: 0.304804
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.272669, loss_all: 0.272669,
+[epoch 322] loss_all: 0.272669
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.301056, loss_all: 0.301056,
+[epoch 323] loss_all: 0.301056
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.269129, loss_all: 0.269129,
+[epoch 324] loss_all: 0.269129
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.299508, loss_all: 0.299508,
+[epoch 325] loss_all: 0.299508
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.266938, loss_all: 0.266938,
+[epoch 326] loss_all: 0.266938
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.295643, loss_all: 0.295643,
+[epoch 327] loss_all: 0.295643
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.268978, loss_all: 0.268978,
+[epoch 328] loss_all: 0.268978
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.292995, loss_all: 0.292995,
+[epoch 329] loss_all: 0.292995
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.263494, loss_all: 0.263494,
+[epoch 330] loss_all: 0.263494
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.289780, loss_all: 0.289780,
+[epoch 331] loss_all: 0.289780
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.264506, loss_all: 0.264506,
+[epoch 332] loss_all: 0.264506
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.289752, loss_all: 0.289752,
+[epoch 333] loss_all: 0.289752
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.260776, loss_all: 0.260776,
+[epoch 334] loss_all: 0.260776
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.287086, loss_all: 0.287086,
+[epoch 335] loss_all: 0.287086
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.260450, loss_all: 0.260450,
+[epoch 336] loss_all: 0.260450
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.283598, loss_all: 0.283598,
+[epoch 337] loss_all: 0.283598
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.256780, loss_all: 0.256780,
+[epoch 338] loss_all: 0.256780
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.280222, loss_all: 0.280222,
+[epoch 339] loss_all: 0.280222
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.252856, loss_all: 0.252856,
+[epoch 340] loss_all: 0.252856
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.277718, loss_all: 0.277718,
+[epoch 341] loss_all: 0.277718
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.254788, loss_all: 0.254788,
+[epoch 342] loss_all: 0.254788
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.274450, loss_all: 0.274450,
+[epoch 343] loss_all: 0.274450
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.254209, loss_all: 0.254209,
+[epoch 344] loss_all: 0.254209
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.271825, loss_all: 0.271825,
+[epoch 345] loss_all: 0.271825
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.250840, loss_all: 0.250840,
+[epoch 346] loss_all: 0.250840
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.271005, loss_all: 0.271005,
+[epoch 347] loss_all: 0.271005
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.248352, loss_all: 0.248352,
+[epoch 348] loss_all: 0.248352
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.267668, loss_all: 0.267668,
+[epoch 349] loss_all: 0.267668
+
+[epoch 349] checkpoint!
+inner-view loss weights: tensor([1., 1., 1., 1., 1., 1.], device='cuda:0')
+l2r: acc of top [1, 10, 50] = [0.4238 0.6911 0.8295], mr = 108.709, mrr = 0.515, time = 3.4774 s 
+r2l: acc of top [1, 10, 50] = [0.4399 0.6979 0.8333], mr = 98.606, mrr = 0.528, time = 3.4777 s 
+
+AdamW (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.0005
+    maximize: False
+    weight_decay: 0.01
+)
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.248186, loss_all: 0.248186,
+[epoch 350] loss_all: 0.248186
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.267680, loss_all: 0.267680,
+[epoch 351] loss_all: 0.267680
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.245550, loss_all: 0.245550,
+[epoch 352] loss_all: 0.245550
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.266966, loss_all: 0.266966,
+[epoch 353] loss_all: 0.266966
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.250313, loss_all: 0.250313,
+[epoch 354] loss_all: 0.250313
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.265216, loss_all: 0.265216,
+[epoch 355] loss_all: 0.265216
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.243140, loss_all: 0.243140,
+[epoch 356] loss_all: 0.243140
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.260656, loss_all: 0.260656,
+[epoch 357] loss_all: 0.260656
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.239685, loss_all: 0.239685,
+[epoch 358] loss_all: 0.239685
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.260141, loss_all: 0.260141,
+[epoch 359] loss_all: 0.260141
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.238349, loss_all: 0.238349,
+[epoch 360] loss_all: 0.238349
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.257614, loss_all: 0.257614,
+[epoch 361] loss_all: 0.257614
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.237317, loss_all: 0.237317,
+[epoch 362] loss_all: 0.237317
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.255790, loss_all: 0.255790,
+[epoch 363] loss_all: 0.255790
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.235213, loss_all: 0.235213,
+[epoch 364] loss_all: 0.235213
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.253222, loss_all: 0.253222,
+[epoch 365] loss_all: 0.253222
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.233996, loss_all: 0.233996,
+[epoch 366] loss_all: 0.233996
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.252433, loss_all: 0.252433,
+[epoch 367] loss_all: 0.252433
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.235948, loss_all: 0.235948,
+[epoch 368] loss_all: 0.235948
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.250548, loss_all: 0.250548,
+[epoch 369] loss_all: 0.250548
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.230079, loss_all: 0.230079,
+[epoch 370] loss_all: 0.230079
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.248325, loss_all: 0.248325,
+[epoch 371] loss_all: 0.248325
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.229817, loss_all: 0.229817,
+[epoch 372] loss_all: 0.229817
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.245154, loss_all: 0.245154,
+[epoch 373] loss_all: 0.245154
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.226891, loss_all: 0.226891,
+[epoch 374] loss_all: 0.226891
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.244429, loss_all: 0.244429,
+[epoch 375] loss_all: 0.244429
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.231304, loss_all: 0.231304,
+[epoch 376] loss_all: 0.231304
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.242687, loss_all: 0.242687,
+[epoch 377] loss_all: 0.242687
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.225048, loss_all: 0.225048,
+[epoch 378] loss_all: 0.225048
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.240746, loss_all: 0.240746,
+[epoch 379] loss_all: 0.240746
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.225513, loss_all: 0.225513,
+[epoch 380] loss_all: 0.225513
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.239677, loss_all: 0.239677,
+[epoch 381] loss_all: 0.239677
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.224055, loss_all: 0.224055,
+[epoch 382] loss_all: 0.224055
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.237797, loss_all: 0.237797,
+[epoch 383] loss_all: 0.237797
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.221626, loss_all: 0.221626,
+[epoch 384] loss_all: 0.221626
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.236284, loss_all: 0.236284,
+[epoch 385] loss_all: 0.236284
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.220701, loss_all: 0.220701,
+[epoch 386] loss_all: 0.220701
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.234178, loss_all: 0.234178,
+[epoch 387] loss_all: 0.234178
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.218338, loss_all: 0.218338,
+[epoch 388] loss_all: 0.218338
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.232902, loss_all: 0.232902,
+[epoch 389] loss_all: 0.232902
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.217942, loss_all: 0.217942,
+[epoch 390] loss_all: 0.217942
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.231520, loss_all: 0.231520,
+[epoch 391] loss_all: 0.231520
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.217138, loss_all: 0.217138,
+[epoch 392] loss_all: 0.217138
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.231384, loss_all: 0.231384,
+[epoch 393] loss_all: 0.231384
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.215231, loss_all: 0.215231,
+[epoch 394] loss_all: 0.215231
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.228438, loss_all: 0.228438,
+[epoch 395] loss_all: 0.228438
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.213699, loss_all: 0.213699,
+[epoch 396] loss_all: 0.213699
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.226775, loss_all: 0.226775,
+[epoch 397] loss_all: 0.226775
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.212630, loss_all: 0.212630,
+[epoch 398] loss_all: 0.212630
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.224938, loss_all: 0.224938,
+[epoch 399] loss_all: 0.224938
+
+[epoch 399] checkpoint!
+inner-view loss weights: tensor([1., 1., 1., 1., 1., 1.], device='cuda:0')
+l2r: acc of top [1, 10, 50] = [0.4406 0.7008 0.8359], mr = 117.780, mrr = 0.530, time = 3.4707 s 
+r2l: acc of top [1, 10, 50] = [0.4525 0.708  0.8387], mr = 100.210, mrr = 0.539, time = 3.4710 s 
+
+AdamW (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.0005
+    maximize: False
+    weight_decay: 0.01
+)
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.214015, loss_all: 0.214015,
+[epoch 400] loss_all: 0.214015
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.226947, loss_all: 0.226947,
+[epoch 401] loss_all: 0.226947
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.213084, loss_all: 0.213084,
+[epoch 402] loss_all: 0.213084
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.222885, loss_all: 0.222885,
+[epoch 403] loss_all: 0.222885
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.210814, loss_all: 0.210814,
+[epoch 404] loss_all: 0.210814
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.221357, loss_all: 0.221357,
+[epoch 405] loss_all: 0.221357
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.210147, loss_all: 0.210147,
+[epoch 406] loss_all: 0.210147
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.221506, loss_all: 0.221506,
+[epoch 407] loss_all: 0.221506
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.213042, loss_all: 0.213042,
+[epoch 408] loss_all: 0.213042
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.219600, loss_all: 0.219600,
+[epoch 409] loss_all: 0.219600
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.209717, loss_all: 0.209717,
+[epoch 410] loss_all: 0.209717
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.216946, loss_all: 0.216946,
+[epoch 411] loss_all: 0.216946
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.207253, loss_all: 0.207253,
+[epoch 412] loss_all: 0.207253
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.215922, loss_all: 0.215922,
+[epoch 413] loss_all: 0.215922
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.205462, loss_all: 0.205462,
+[epoch 414] loss_all: 0.205462
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.215059, loss_all: 0.215059,
+[epoch 415] loss_all: 0.215059
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.203894, loss_all: 0.203894,
+[epoch 416] loss_all: 0.203894
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.214413, loss_all: 0.214413,
+[epoch 417] loss_all: 0.214413
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.202540, loss_all: 0.202540,
+[epoch 418] loss_all: 0.202540
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.214198, loss_all: 0.214198,
+[epoch 419] loss_all: 0.214198
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.203325, loss_all: 0.203325,
+[epoch 420] loss_all: 0.203325
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.211486, loss_all: 0.211486,
+[epoch 421] loss_all: 0.211486
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.202239, loss_all: 0.202239,
+[epoch 422] loss_all: 0.202239
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.211978, loss_all: 0.211978,
+[epoch 423] loss_all: 0.211978
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.204483, loss_all: 0.204483,
+[epoch 424] loss_all: 0.204483
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.210147, loss_all: 0.210147,
+[epoch 425] loss_all: 0.210147
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.200493, loss_all: 0.200493,
+[epoch 426] loss_all: 0.200493
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.208281, loss_all: 0.208281,
+[epoch 427] loss_all: 0.208281
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.198465, loss_all: 0.198465,
+[epoch 428] loss_all: 0.198465
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.207071, loss_all: 0.207071,
+[epoch 429] loss_all: 0.207071
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.197264, loss_all: 0.197264,
+[epoch 430] loss_all: 0.197264
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.207143, loss_all: 0.207143,
+[epoch 431] loss_all: 0.207143
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.196743, loss_all: 0.196743,
+[epoch 432] loss_all: 0.196743
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.206217, loss_all: 0.206217,
+[epoch 433] loss_all: 0.206217
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.194781, loss_all: 0.194781,
+[epoch 434] loss_all: 0.194781
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.205646, loss_all: 0.205646,
+[epoch 435] loss_all: 0.205646
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.193494, loss_all: 0.193494,
+[epoch 436] loss_all: 0.193494
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.203437, loss_all: 0.203437,
+[epoch 437] loss_all: 0.203437
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.193909, loss_all: 0.193909,
+[epoch 438] loss_all: 0.193909
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.202431, loss_all: 0.202431,
+[epoch 439] loss_all: 0.202431
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.193444, loss_all: 0.193444,
+[epoch 440] loss_all: 0.193444
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.202504, loss_all: 0.202504,
+[epoch 441] loss_all: 0.202504
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.194130, loss_all: 0.194130,
+[epoch 442] loss_all: 0.194130
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.202119, loss_all: 0.202119,
+[epoch 443] loss_all: 0.202119
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.193940, loss_all: 0.193940,
+[epoch 444] loss_all: 0.193940
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.199589, loss_all: 0.199589,
+[epoch 445] loss_all: 0.199589
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.191712, loss_all: 0.191712,
+[epoch 446] loss_all: 0.191712
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.198889, loss_all: 0.198889,
+[epoch 447] loss_all: 0.198889
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.190776, loss_all: 0.190776,
+[epoch 448] loss_all: 0.190776
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.197055, loss_all: 0.197055,
+[epoch 449] loss_all: 0.197055
+
+[epoch 449] checkpoint!
+inner-view loss weights: tensor([1., 1., 1., 1., 1., 1.], device='cuda:0')
+l2r: acc of top [1, 10, 50] = [0.4344 0.6967 0.8306], mr = 130.900, mrr = 0.524, time = 3.4798 s 
+r2l: acc of top [1, 10, 50] = [0.4496 0.7013 0.8304], mr = 114.661, mrr = 0.535, time = 3.4801 s 
+
+AdamW (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    differentiable: False
+    eps: 1e-08
+    foreach: None
+    fused: None
+    lr: 0.0005
+    maximize: False
+    weight_decay: 0.01
+)
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.190819, loss_all: 0.190819,
+[epoch 450] loss_all: 0.190819
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.196664, loss_all: 0.196664,
+[epoch 451] loss_all: 0.196664
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.189604, loss_all: 0.189604,
+[epoch 452] loss_all: 0.189604
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.195512, loss_all: 0.195512,
+[epoch 453] loss_all: 0.195512
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.189092, loss_all: 0.189092,
+[epoch 454] loss_all: 0.189092
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.195108, loss_all: 0.195108,
+[epoch 455] loss_all: 0.195108
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.188110, loss_all: 0.188110,
+[epoch 456] loss_all: 0.188110
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.193721, loss_all: 0.193721,
+[epoch 457] loss_all: 0.193721
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.187208, loss_all: 0.187208,
+[epoch 458] loss_all: 0.187208
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.192484, loss_all: 0.192484,
+[epoch 459] loss_all: 0.192484
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.186237, loss_all: 0.186237,
+[epoch 460] loss_all: 0.186237
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.193659, loss_all: 0.193659,
+[epoch 461] loss_all: 0.193659
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.190742, loss_all: 0.190742,
+[epoch 462] loss_all: 0.190742
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.191645, loss_all: 0.191645,
+[epoch 463] loss_all: 0.191645
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.188822, loss_all: 0.188822,
+[epoch 464] loss_all: 0.188822
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.190655, loss_all: 0.190655,
+[epoch 465] loss_all: 0.190655
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.189708, loss_all: 0.189708,
+[epoch 466] loss_all: 0.189708
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.188226, loss_all: 0.188226,
+[epoch 467] loss_all: 0.188226
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.188207, loss_all: 0.188207,
+[epoch 468] loss_all: 0.188207
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.187146, loss_all: 0.187146,
+[epoch 469] loss_all: 0.187146
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.187236, loss_all: 0.187236,
+[epoch 470] loss_all: 0.187236
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.185660, loss_all: 0.185660,
+[epoch 471] loss_all: 0.185660
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.186363, loss_all: 0.186363,
+[epoch 472] loss_all: 0.186363
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.185245, loss_all: 0.185245,
+[epoch 473] loss_all: 0.185245
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.184854, loss_all: 0.184854,
+[epoch 474] loss_all: 0.184854
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.184117, loss_all: 0.184117,
+[epoch 475] loss_all: 0.184117
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.184194, loss_all: 0.184194,
+[epoch 476] loss_all: 0.184194
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.184342, loss_all: 0.184342,
+[epoch 477] loss_all: 0.184342
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.184590, loss_all: 0.184590,
+[epoch 478] loss_all: 0.184590
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.183584, loss_all: 0.183584,
+[epoch 479] loss_all: 0.183584
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.183527, loss_all: 0.183527,
+[epoch 480] loss_all: 0.183527
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.182734, loss_all: 0.182734,
+[epoch 481] loss_all: 0.182734
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.181697, loss_all: 0.181697,
+[epoch 482] loss_all: 0.181697
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.182673, loss_all: 0.182673,
+[epoch 483] loss_all: 0.182673
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.181422, loss_all: 0.181422,
+[epoch 484] loss_all: 0.181422
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.183519, loss_all: 0.183519,
+[epoch 485] loss_all: 0.183519
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.182452, loss_all: 0.182452,
+[epoch 486] loss_all: 0.182452
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.181419, loss_all: 0.181419,
+[epoch 487] loss_all: 0.181419
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.181218, loss_all: 0.181218,
+[epoch 488] loss_all: 0.181218
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.180731, loss_all: 0.180731,
+[epoch 489] loss_all: 0.180731
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.180522, loss_all: 0.180522,
+[epoch 490] loss_all: 0.180522
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.180466, loss_all: 0.180466,
+[epoch 491] loss_all: 0.180466
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.179655, loss_all: 0.179655,
+[epoch 492] loss_all: 0.179655
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.179758, loss_all: 0.179758,
+[epoch 493] loss_all: 0.179758
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.178507, loss_all: 0.178507,
+[epoch 494] loss_all: 0.178507
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.178875, loss_all: 0.178875,
+[epoch 495] loss_all: 0.178875
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.179224, loss_all: 0.179224,
+[epoch 496] loss_all: 0.179224
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.179191, loss_all: 0.179191,
+[epoch 497] loss_all: 0.179191
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.178054, loss_all: 0.178054,
+[epoch 498] loss_all: 0.178054
+gph_emb torch.Size([27793, 300])
+img_emb torch.Size([27793, 300])
+rel_emb torch.Size([27793, 300])
+att_emb torch.Size([27793, 300])
+joint_emb torch.Size([27793, 1200])
+train_ill length: 2569
+ joint loss: 0.177562, loss_all: 0.177562,
+[epoch 499] loss_all: 0.177562
+
+[epoch 499] checkpoint!
+inner-view loss weights: tensor([1., 1., 1., 1., 1., 1.], device='cuda:0')
+l2r: acc of top [1, 10, 50] = [0.4474 0.7042 0.8338], mr = 133.086, mrr = 0.535, time = 3.4736 s 
+r2l: acc of top [1, 10, 50] = [0.4604 0.7104 0.8373], mr = 115.791, mrr = 0.546, time = 3.4739 s 
+
+[optimization finished!]
+best epoch is 499, hits@1 hits@10 MRR MR is: [np.float32(0.4474), np.float32(0.7042), 0.5350280468648688, 133.08592001556875]
+
+[total time elapsed: 89.0675 s]
+run.sh

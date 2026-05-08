@@ -41,7 +41,7 @@ def load_img_features_use_mean_img(ent_num, file_dir, triples):
     elif "FBDB15K" in file_dir:
         filename = os.path.split(file_dir)[-1].upper()
         img_vec_path = (
-            "/data/mmkg/pkls/FBDB15K_id_img_feature_dict.pkl"
+            "data/mmkg/pkls/FBDB15K_id_img_feature_dict.pkl"
         )
     else:
         split = file_dir.split("/")[-1]
@@ -513,7 +513,7 @@ class MyGram:
 
         data_dir, dataname = os.path.split(file_dir)
         if self.args.word_embedding == "glove":
-            word2vec_path = "data/embedding/glove.6B.300d.txt"
+            word2vec_path = "data/mmkg/embedding/glove.6B.300d.txt"
         elif self.args.word_embedding == "fasttext":
             pass
         else:
@@ -654,7 +654,6 @@ class MyGram:
             )
 
         self.criterion_cl = InfoNCE_loss(device=self.device, temperature=self.args.tau)
-        self.gram_loss = GRAM_Loss(temperature=0.05)
 
     def semi_supervised_learning(self):
 
@@ -692,7 +691,6 @@ class MyGram:
         self,
         joint_emb,
         gph_emb,
-        gph_emb1,
         rel_emb,
         att_emb,
         img_emb,
@@ -700,12 +698,9 @@ class MyGram:
         char_emb,
         train_ill,
     ):
-        loss_gram = self.gram_loss(gph_emb1, img_emb, att_emb, rel_emb,train_ill)
-        loss_nce =self.criterion_align(joint_emb, train_ill) if joint_emb is not None else 0
-        
-        total_loss = loss_nce + 0.1 * loss_gram
-        print(" joint loss: {:f},".format(total_loss), end="")
-        return total_loss
+        loss_nce = self.criterion_align(joint_emb, train_ill) if joint_emb is not None else 0
+        print(" joint loss: {:f},".format(loss_nce), end="")
+        return loss_nce
 
     def train(self):
 
@@ -766,7 +761,6 @@ class MyGram:
                     align_loss = self.alignment_loss(
                         joint_emb,
                         gph_emb,
-                        gph_emb1,
                         rel_emb,
                         att_emb,
                         img_emb,
