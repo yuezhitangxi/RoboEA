@@ -88,19 +88,6 @@ def load_data_dual(lang):
     return adj_matrix, np.array(r_index), np.array(r_val), adj_features, rel_features
 
 
-def loadfile(fn, num=1):
-    print("loading a file..." + fn)
-    ret = []
-    with open(fn, encoding="utf-8") as f:
-        for line in f:
-            th = line[:-1].split("\t")
-            x = []
-            for i in range(num):
-                x.append(int(th[i]))
-            ret.append(tuple(x))
-    return ret
-
-
 def get_ids(fn):
     ids = []
     with open(fn, encoding="utf-8") as f:
@@ -108,16 +95,6 @@ def get_ids(fn):
             th = line[:-1].split("\t")
             ids.append(int(th[0]))
     return ids
-
-
-def get_ent2id(fns):
-    ent2id = {}
-    for fn in fns:
-        with open(fn, "r", encoding="utf-8") as f:
-            for line in f:
-                th = line[:-1].split("\t")
-                ent2id[th[1]] = int(th[0])
-    return ent2id
 
 
 def load_attr(fns, e, ent2id, topA=1000):
@@ -162,52 +139,6 @@ def load_relation(e, KG, topR=1000):
             rel_mat[h][rel_index_dict[r]] += 1.0
             rel_mat[o][rel_index_dict[r]] += 1.0
     return np.array(rel_mat)
-
-
-def load_json_embd(path):
-    embd_dict = {}
-    with open(path) as f:
-        for line in f:
-            example = json.loads(line.strip())
-            vec = np.array([float(e) for e in example["feature"].split()])
-            embd_dict[int(example["guid"])] = vec
-    return embd_dict
-
-
-def load_img(e_num, path):
-    img_dict = pickle.load(open(path, "rb"))
-    imgs_np = np.array(list(img_dict.values()))
-    mean = np.mean(imgs_np, axis=0)
-    std = np.std(imgs_np, axis=0)
-    img_embd = np.array(
-        [
-            img_dict[i] if i in img_dict else np.random.normal(mean, std, mean.shape[0])
-            for i in range(e_num)
-        ]
-    )
-    print(
-        "%.2f%% entities have images, use np.random.normal init"
-        % (100 * len(img_dict) / e_num)
-    )
-    return img_embd
-
-
-def load_img_zero(e_num, path):
-    img_dict = pickle.load(open(path, "rb"))
-    imgs_np = np.array(list(img_dict.values()))
-    mean = np.mean(imgs_np, axis=0)
-    std = np.std(imgs_np, axis=0)
-    img_embd = np.array(
-        [
-            img_dict[i] if i in img_dict else np.zeros(mean.shape[0])
-            for i in range(e_num)
-        ]
-    )
-    print(
-        "%.2f%% entities have images, use np.random.zeros init"
-        % (100 * len(img_dict) / e_num)
-    )
-    return img_embd
 
 
 def load_img_new(e_num, path, triples):

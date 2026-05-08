@@ -86,32 +86,14 @@ class MyGram:
         self.test_right = None
 
         self.multimodal_encoder = None
-        self.weight_raw = None
-        self.rel_fc = None
-        self.att_fc = None
-        self.img_fc = None
-        self.char_fc = None
-        self.shared_fc = None
-
-        self.gcn_pro = None
-        self.rel_pro = None
-        self.attr_pro = None
-        self.img_pro = None
         self.input_dim = None
-        self.entity_emb = None
         self.input_idx = None
-        self.n_units = None
-        self.n_heads = None
-        self.cross_graph_model = None
         self.params = None
         self.optimizer = None
 
-        self.criterion_cl = None
         self.criterion_align = None
 
         self.multi_loss_layer = None
-        self.align_multi_loss_layer = None
-        self.fusion = None  # fusion module
 
         self.parser = argparse.ArgumentParser()
         self.args = self.parse_options(self.parser)
@@ -156,12 +138,6 @@ class MyGram:
             type=str,
             default="128,128,128",
             help="hidden units in each hidden layer(including in_dim and out_dim), splitted with comma",
-        )
-        parser.add_argument(
-            "--heads",
-            type=str,
-            default="2,2",
-            help="heads in each gat layer, splitted with comma",
         )
         parser.add_argument(
             "--instance_normalization",
@@ -233,13 +209,13 @@ class MyGram:
             "--with_weight",
             type=int,
             default=1,
-            help="Whether to weight the fusion of different " "modal features",
+            help="Whether to weight the fusion of different modal features",
         )
         parser.add_argument(
             "--structure_encoder",
             type=str,
             default="gat",
-            help="the encoder of structure view, " "[gcn|gat|Dualmodal]",
+            help="the encoder of structure view, [gcn|gat|Dualmodal]",
         )
 
         parser.add_argument(
@@ -433,10 +409,11 @@ class MyGram:
 
     @staticmethod
     def set_seed(seed, cuda=True):
+        os.environ["PYTHONHASHSEED"] = str(seed)
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
-        if cuda:
+        if cuda and torch.cuda.is_available():
             torch.cuda.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
             torch.backends.cudnn.deterministic = True
@@ -598,9 +575,6 @@ class MyGram:
 
     def init_model(self):
         img_dim = self.img_features.shape[1]
-        char_dim = (
-            self.char_features.shape[1] if self.char_features is not None else 100
-        )
         if "Dualmodal" in self.args.structure_encoder:
             if self.args.structure_encoder == "Dualmodal-joint-LMF":
                 self.multimodal_encoder = MultiModalEncoderMrFusion(
@@ -614,10 +588,6 @@ class MyGram:
                     r_val=self.r_val.to(self.device),
                     rel_matrix=self.rel_matrix.to(self.device),
                     ent_matrix=self.ent_matrix.to(self.device),
-                    char_feature_dim=char_dim,
-                    use_project_head=self.args.use_project_head,
-                    left_ents=self.left_ents,
-                    right_ents=self.right_ents,
                 ).to(self.device)
 
         if self.args.use_ms_loss:
@@ -658,16 +628,10 @@ class MyGram:
                 num_training_steps=self.args.num_training_steps,
             )
 
-        ms_alpha = self.args.ms_alpha
-        ms_beta = self.args.ms_beta
-        ms_base = self.args.ms_base
-
         if self.args.joint_use_nce:
             self.criterion_align = InfoNCE_loss(
                 device=self.device, temperature=self.args.tau
             )
-
-        self.criterion_cl = InfoNCE_loss(device=self.device, temperature=self.args.tau)
 
     def semi_supervised_learning(self):
 

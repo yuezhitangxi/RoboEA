@@ -10,14 +10,13 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import random
 import numpy as np
 from Mfusion import *
 
 
 class RRGAT(nn.Module):
     def __init__(
-        self, args,node_size, rel_size, triple_size, node_dim, depth=1, mr_fusion_type=0
+        self, args, node_size, rel_size, triple_size, node_dim, depth=1
     ):
         super(RRGAT, self).__init__()
 
@@ -29,8 +28,6 @@ class RRGAT(nn.Module):
         self.activation = torch.nn.Tanh()
         self.depth = depth
         self.attn_kernels = nn.ParameterList()
-        self.fusion_type = mr_fusion_type
-
 
         for l in range(self.depth):
             attn_kernel = torch.nn.Parameter(
@@ -104,10 +101,6 @@ class MultiModalEncoderMrFusion(nn.Module):
         r_val,
         rel_matrix,
         ent_matrix,
-        char_feature_dim=None,
-        use_project_head=False,
-        left_ents=None,
-        right_ents=None,
     ):
         super(MultiModalEncoderMrFusion, self).__init__()
 
@@ -115,18 +108,13 @@ class MultiModalEncoderMrFusion(nn.Module):
         attr_dim = self.args.attr_dim
         img_dim = self.args.img_dim
         self.ENT_NUM = ent_num
-        self.use_project_head = use_project_head
 
-        self.n_units = [int(x) for x in self.args.hidden_units.strip().split(",")]
-        self.n_heads = [int(x) for x in self.args.heads.strip().split(",")]
         self.input_dim = int(self.args.hidden_units.strip().split(",")[0])
 
         self.rel_fc = nn.Linear(1000, attr_dim)
         self.att_fc = nn.Linear(1000, attr_dim)
         self.img_fc = nn.Linear(img_feature_dim, img_dim)
 
-        self.left_ents = left_ents
-        self.right_ents = right_ents
         if "Dualmodal" in self.args.structure_encoder:
             self.node_hidden = self.input_dim
             self.rel_hidden = self.input_dim
@@ -139,14 +127,11 @@ class MultiModalEncoderMrFusion(nn.Module):
             self.r_val = r_val
             self.rel_adj = rel_matrix
             self.ent_adj = ent_matrix
-            self.dropout = nn.Dropout(args.dropout)
 
-            self.mr_fusion_type = self.args.mr_fusion_type
             self.final_fusion_type = self.args.final_fusion_type
 
             self.ent_embedding = nn.Embedding(self.node_size, self.node_hidden)
             self.rel_embedding = nn.Embedding(self.rel_size, self.rel_hidden)
-            self.rel_fc_dual = nn.Linear(self.rel_size, self.rel_hidden)
             nn.init.xavier_uniform_(self.ent_embedding.weight)
             nn.init.xavier_uniform_(self.rel_embedding.weight)
 
@@ -157,21 +142,8 @@ class MultiModalEncoderMrFusion(nn.Module):
                 triple_size=self.triple_size,
                 node_dim=self.node_hidden,
                 depth=self.depth,
-                mr_fusion_type=self.mr_fusion_type,
             )
-            self.r_encoder = RRGAT(
-                args=self.args,
-                node_size=self.node_size,
-                rel_size=self.rel_size,
-                triple_size=self.triple_size,
-                node_dim=self.node_hidden,
-                depth=self.depth,
-                
-            )
-        self.fusion1 = MFusion(args, modal_num=3,
-                                        with_weight=1)
-
-        self.MCD = MCD(k=2, alpha=0.7, beta=0.3, x_drop_rate=0., edge_drop_rate=0., z_drop_rate=0.)
+        self.fusion1 = MFusion(args, modal_num=3)
 
 
     def avg(self, adj, emb, size: int):
@@ -195,7 +167,6 @@ class MultiModalEncoderMrFusion(nn.Module):
         char_features=None,
     ):
 
-        g = MCD.build_graph(adj2)
         if self.args.w_img:
             img_emb = self.img_fc(img_features)
         else:
@@ -209,12 +180,6 @@ class MultiModalEncoderMrFusion(nn.Module):
         else:
             att_emb = None
 
-
-        emb_dict = { "relation": rel_emb, "attribute": att_emb, "image": img_emb}
-        enhanced_emb_dict = self.MCD(g, emb_dict)
-        rel_emb = rel_emb
-        att_emb = att_emb 
-        img_emb = img_emb
 
         if self.args.w_gcn:
             if self.args.structure_encoder == "Dualmodal-joint-LMF":

@@ -6,17 +6,13 @@ from __future__ import unicode_literals
 from __future__ import division
 from __future__ import print_function
 
-import os, time, multiprocessing
-import math
+import time, multiprocessing
 import random
 import numpy as np
 import scipy
 import scipy.sparse as sp
 import torch
 import gc
-from tqdm import tqdm
-import json
-from torch.utils.data import Dataset
 
 
 def normalize_adj(mx):
@@ -27,15 +23,6 @@ def normalize_adj(mx):
     r_mat_inv_sqrt = sp.diags(r_inv_sqrt)
     return mx.dot(r_mat_inv_sqrt).transpose().dot(r_mat_inv_sqrt)
 
-
-def normalize_features(mx):
-    """Row-normalize sparse matrix"""
-    rowsum = np.array(mx.sum(1))
-    r_inv = np.power(rowsum, -1).flatten()
-    r_inv[np.isinf(r_inv)] = 0.0
-    r_mat_inv = sp.diags(r_inv)
-    mx = r_mat_inv.dot(mx)
-    return mx
 
 
 def sparse_mx_to_torch_sparse_tensor(sparse_mx):
@@ -118,103 +105,6 @@ def div_list(ls, n):
             ls_return.append(ls[i : i + j])
         ls_return.append(ls[(n - 1) * j :])
         return ls_return
-
-
-def multi_cal_neg(pos_triples, task, triples, r_hs_dict, r_ts_dict, ids, neg_scope):
-    neg_triples = list()
-    for idx, tas in enumerate(task):
-        (h, r, t) = pos_triples[tas]
-        h2, r2, t2 = h, r, t
-        temp_scope, num = neg_scope, 0
-        while True:
-            choice = random.randint(0, 999)
-            if choice < 500:
-                if temp_scope:
-                    h2 = random.sample(r_hs_dict[r], 1)[0]
-                else:
-                    for id in ids:
-                        if h2 in id:
-                            h2 = random.sample(id, 1)[0]
-                            break
-            else:
-                if temp_scope:
-                    t2 = random.sample(r_ts_dict[r], 1)[0]
-                else:
-                    for id in ids:
-                        if t2 in id:
-                            t2 = random.sample(id, 1)[0]
-                            break
-            if (h2, r2, t2) not in triples:
-                break
-            else:
-                num += 1
-                if num > 10:
-                    temp_scope = False
-        neg_triples.append((h2, r2, t2))
-    return neg_triples
-
-
-def multi_typed_sampling(pos_triples, triples, r_hs_dict, r_ts_dict, ids, neg_scope):
-    t_ = time.time()
-    triples = set(triples)
-    tasks = div_list(np.array(range(len(pos_triples)), dtype=np.int32), 10)
-    pool = multiprocessing.Pool(processes=len(tasks))
-    reses = list()
-    for task in tasks:
-        reses.append(
-            pool.apply_async(
-                multi_cal_neg,
-                (pos_triples, task, triples, r_hs_dict, r_ts_dict, ids, neg_scope),
-            )
-        )
-    pool.close()
-    pool.join()
-    neg_triples = []
-    for res in reses:
-        neg_triples.extend(res.get())
-    return neg_triples
-
-
-def nearest_neighbor_sampling(emb, left, right, K):
-    t = time.time()
-    neg_left = []
-    distance = pairwise_distances(emb[right], emb[right])
-    for idx in range(right.shape[0]):
-        _, indices = torch.sort(distance[idx, :], descending=False)
-        neg_left.append(right[indices[1 : K + 1]])
-    neg_left = np.array(neg_left)
-    neg_right = []
-    distance = pairwise_distances(emb[left], emb[left])
-    for idx in range(left.shape[0]):
-        _, indices = torch.sort(distance[idx, :], descending=False)
-        neg_right.append(left[indices[1 : K + 1]])
-    neg_right = np.array(neg_right)
-    del distance
-    gc.collect()
-    return neg_left, neg_right
-
-
-def nearest_neighbor_for_ranking(emb, left, right, K):
-    t = time.time()
-    neg_left = []
-    assert len(left) == len(right)
-    distance = pairwise_distances(emb[left], emb[right])
-    for idx in range(right.shape[0]):
-        _, indices = torch.sort(distance[idx, :], descending=False)
-        if idx in indices:
-            indices.remove(idx)
-        neg_left.append(right[indices[: K + 1]])
-    neg_left = np.array(neg_left)
-    neg_right = []
-    for idx in range(left.shape[1]):
-        _, indices = torch.sort(distance[:, idx], descending=False)
-        if idx in indices:
-            indices.remove(idx)
-        neg_right.append(left[indices[:K]])
-    neg_right = np.array(neg_right)
-    del distance
-    gc.collect()
-    return neg_left, neg_right
 
 
 def get_adjr(ent_size, triples, norm=False):
@@ -353,23 +243,6 @@ def csls_sim(sim_mat, k):
     csls_sim_mat = 2 * sim_mat.t() - nearest_values1
     csls_sim_mat = csls_sim_mat.t() - nearest_values2
     return csls_sim_mat
-
-
-def get_topk_indices(M, K=1000):
-    H, W = M.shape
-    M_view = M.view(-1)
-    vals, indices = M_view.topk(K)
-    print("highest sim:", vals[0].item(), "lowest sim:", vals[-1].item())
-    two_d_indices = torch.cat(
-        ((indices // W).unsqueeze(1), (indices % W).unsqueeze(1)), dim=1
-    )
-    return two_d_indices
-
-
-def normalize_zero_one(A):
-    A -= A.min(1, keepdim=True)[0]
-    A /= A.max(1, keepdim=True)[0]
-    return A
 
 
 if __name__ == "__main__":

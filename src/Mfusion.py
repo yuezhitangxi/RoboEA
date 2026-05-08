@@ -2,95 +2,16 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 import math
-import dgl
-import dgl.function as fn
 
 from transformers import apply_chunking_to_forward
 from transformers.activations import ACT2FN
 
-class MCD(nn.Module):
-    CACHE_KEY = "MCD_weight"
-
-    def __init__(self, k, alpha, beta, x_drop_rate, edge_drop_rate, z_drop_rate):
-        super().__init__()
-
-        self.k = k
-        self.alpha = alpha
-        self.beta = beta
-        self.gamma = torch.tensor(self.compute_gamma(alpha, beta, k)).float()
-        self.gammas = [torch.tensor(self.compute_gamma(alpha, beta, i)).float() for i in range(1, k + 1)]
-
-        self.x_dropout = nn.Dropout(x_drop_rate)
-        self.edge_dropout = nn.Dropout(edge_drop_rate)
-        self.z_dropout = nn.Dropout(z_drop_rate)
-
-    @staticmethod
-    def compute_gamma(alpha, beta, k):
-        return beta ** k + alpha * sum(beta ** i for i in range(k))
-
-    @classmethod
-    def build_graph(cls, adj):
-        src, dst = adj.nonzero(as_tuple=True)
-        g = dgl.graph((src, dst), num_nodes=adj.shape[0])
-        g = g.to('cpu')
-        g = dgl.add_self_loop(g)
-        g = g.to('cuda')
-        return g
-
-    @classmethod
-    @torch.no_grad()
-    def norm_adj(cls, g):
-        degs = g.in_degrees().float().pow(-0.5)
-        g.ndata["norm"] = degs
-        g.apply_edges(fn.u_mul_v("norm", "norm", cls.CACHE_KEY))
-
-    def forward(self, g, x_dict, return_all=False):
-        self.norm_adj(g)
-        edge_weight = g.edata[self.CACHE_KEY]
-        dropped_edge_weight = self.edge_dropout(edge_weight)
-
-        out_dict = {}
-        for modality, x in x_dict.items():
-            if x is None:
-                out_dict[modality] = None
-                continue
-
-            h0 = self.x_dropout(x)
-            h = h0
-
-            if return_all:
-                h_list = []
-
-            with g.local_scope():
-                g.edata[self.CACHE_KEY] = dropped_edge_weight
-
-                for _ in range(self.k):
-                    g.ndata["h"] = h
-                    g.update_all(fn.u_mul_e("h", self.CACHE_KEY, "m"), fn.sum("m", "h"))
-                    h = g.ndata.pop("h")
-                    h = h * self.beta + h0 * self.alpha
-
-                    if return_all:
-                        h_list.append(h)
-
-            if not return_all:
-                h = h / self.gamma
-                h = self.z_dropout(h)
-                out_dict[modality] = h
-            else:
-                h_list = [h / gamma for h, gamma in zip(h_list, self.gammas)]
-                h_list = [self.z_dropout(h) for h in h_list]
-                out_dict[modality] = h_list
-
-        return out_dict
-
 class MFusion(nn.Module):
-    def __init__(self, args, modal_num, with_weight=1):
+    def __init__(self, args, modal_num):
         super().__init__()
         self.args = args
         self.modal_num = modal_num
         self.fusion_layer = nn.ModuleList([BertLayer(args) for _ in range(args.num_hidden_layers)])
-        self.type_id = torch.tensor([0, 1, 2, 3, 4, 5]).cuda()
         
     def forward(self, embs):
         embs = [embs[idx] for idx in range(len(embs)) if embs[idx] is not None]
