@@ -757,17 +757,19 @@ class MyGram:
                 )
             )
 
-            print("gph_emb", gph_emb.shape)
-            print("img_emb", img_emb.shape)
-            print("rel_emb", rel_emb.shape)
-            print("att_emb", att_emb.shape)
-            print("joint_emb", joint_emb.shape)
+            if epoch==0:
+
+                print("gph_emb", gph_emb.shape)
+                print("img_emb", img_emb.shape)
+                print("rel_emb", rel_emb.shape)
+                print("att_emb", att_emb.shape)
+                print("joint_emb", joint_emb.shape)
+                print("train_ill length:", len(self.train_ill))
 
 
             loss_sum_all = 0.0
 
-            np.random.shuffle(self.train_ill)
-            print("train_ill length:", len(self.train_ill))
+            np.random.shuffle(self.train_ill)     
             for si in np.arange(0, self.train_ill.shape[0], bsize):
                 loss_all = 0.0
                 loss_list = []
