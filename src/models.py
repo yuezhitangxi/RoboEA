@@ -12,7 +12,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import random
 import numpy as np
-from torch_scatter import scatter_sum
 from Mfusion import *
 
 
@@ -75,17 +74,16 @@ class RRGAT(nn.Module):
             )
             att = torch.sparse.softmax(att, dim=1)
 
-            new_features = scatter_sum(
-                src=neighs * torch.unsqueeze(att.coalesce().values(), dim=-1),
-                dim=0,
-                index=adj[0, :].long(),
-            )
+            _src = neighs * torch.unsqueeze(att.coalesce().values(), dim=-1)
+            _idx = adj[0, :].long()
+            new_features = torch.zeros(self.node_size, _src.shape[-1], device=_src.device, dtype=_src.dtype)
+            new_features.scatter_add_(0, _idx.unsqueeze(-1).expand_as(_src), _src)
             features = self.activation(new_features)
             outputs.append(features)
         # outputs = torch.cat(outputs, dim=-1)
         # final_outputs = outputs
         # return final_outputs
-        return torch.cat([outputs[0], outputs[1]], dim=-1)
+        return torch.cat(outputs, dim=-1)
 
 class MultiModalEncoderMrFusion(nn.Module):
     """
