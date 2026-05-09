@@ -37,6 +37,10 @@ class RRGAT(nn.Module):
             self.attn_kernels.append(attn_kernel)
         self.modal_num = 3
 
+        self.rel_msg_proj = nn.Linear(node_dim, node_dim)
+        self.rel_gate_proj = nn.Linear(node_dim * 2, 1)
+        nn.init.constant_(self.rel_gate_proj.bias, 2.0)
+
     def forward(self, inputs):
         outputs = []
         features = inputs[0]
@@ -56,22 +60,23 @@ class RRGAT(nn.Module):
                 values=r_val,
                 size=[self.triple_size, self.rel_size],
                 dtype=torch.float32,
+                device=features.device,
             )
             tri_rel = torch.sparse.mm(tri_rel, rel_emb)
             neighs = features[adj[1, :].long()]
             tri_rel = F.normalize(tri_rel, dim=1, p=2)
 
-            # neighs = (
-            #     neighs - 2 * torch.sum(neighs * tri_rel, dim=1, keepdim=True) * tri_rel
-            # )
-
+            rel_msg = self.activation(self.rel_msg_proj(tri_rel))
+            gate = torch.sigmoid(self.rel_gate_proj(torch.cat([neighs, tri_rel], dim=-1)))
+            message = gate * neighs + (1.0 - gate) * rel_msg
             att = torch.squeeze(torch.mm(tri_rel, attention_kernel), dim=-1)
             att = torch.sparse_coo_tensor(
-                indices=adj, values=att, size=[self.node_size, self.node_size]
+                indices=adj, values=att, size=[self.node_size, self.node_size],
+                device=features.device,
             )
             att = torch.sparse.softmax(att, dim=1)
 
-            _src = neighs * torch.unsqueeze(att.coalesce().values(), dim=-1)
+            _src = message * torch.unsqueeze(att.coalesce().values(), dim=-1)
             _idx = adj[0, :].long()
             new_features = torch.zeros(self.node_size, _src.shape[-1], device=_src.device, dtype=_src.dtype)
             new_features.scatter_add_(0, _idx.unsqueeze(-1).expand_as(_src), _src)
