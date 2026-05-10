@@ -148,6 +148,14 @@ class MultiModalEncoderMrFusion(nn.Module):
                 node_dim=self.node_hidden,
                 depth=self.depth,
             )
+
+            graph_dim = self.node_hidden * (self.depth + 1)
+            fused_modal_dim = attr_dim * 3
+            self.sg_fusion = StructureGuidedFusion(
+                graph_dim=graph_dim,
+                fused_modal_dim=fused_modal_dim,
+                dropout=0.1,
+            )
         self.fusion1 = MFusion(args, modal_num=3)
 
 
@@ -188,16 +196,6 @@ class MultiModalEncoderMrFusion(nn.Module):
 
         if self.args.w_gcn:
             if self.args.structure_encoder == "Dualmodal-joint-LMF":
-                joint_emb = []
-                if img_emb is not None:
-                    joint_emb.append(img_emb)
-
-                if rel_emb is not None:
-                    joint_emb.append(rel_emb)
-    
-                if att_emb is not None:
-                    joint_emb.append(att_emb)
-
                 ent_feature = self.avg(self.ent_adj, self.ent_embedding.weight, self.node_size)
                 opt = [self.rel_embedding.weight, self.adj_list, self.r_index, self.r_val]
                 gph_emb1=ent_feature
@@ -206,8 +204,15 @@ class MultiModalEncoderMrFusion(nn.Module):
                 if self.final_fusion_type == -1:
                     joint_emb = gph_emb
                 else:
-                    joint_emb = self.fusion1(joint_emb)
-                    joint_emb = torch.cat([gph_emb, joint_emb], dim=-1)
+                    joint_emb_list = []
+                    if img_emb is not None:
+                        joint_emb_list.append(img_emb)
+                    if rel_emb is not None:
+                        joint_emb_list.append(rel_emb)
+                    if att_emb is not None:
+                        joint_emb_list.append(att_emb)
+                    joint_emb = self.fusion1(joint_emb_list)
+                    joint_emb = self.sg_fusion(gph_emb, joint_emb)
         else:
             gph_emb = None
         name_emb, char_emb = None, None

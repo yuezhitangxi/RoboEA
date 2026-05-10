@@ -170,3 +170,22 @@ class BertLayer(nn.Module):
         intermediate_output = self.intermediate(attention_output)
         layer_output = self.output(intermediate_output, attention_output)
         return layer_output
+
+
+class StructureGuidedFusion(nn.Module):
+    def __init__(self, graph_dim, fused_modal_dim, dropout=0.1):
+        super().__init__()
+        self.gate_mlp = nn.Sequential(
+            nn.Linear(graph_dim + fused_modal_dim, 512),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(512, fused_modal_dim),
+        )
+
+    def forward(self, gph_emb, modal_fused):
+        g_norm = F.normalize(gph_emb, dim=-1)
+        m_norm = F.normalize(modal_fused, dim=-1)
+        gate_raw = self.gate_mlp(torch.cat([g_norm, m_norm], dim=-1))
+        gate = 1.0 + 0.08 * torch.tanh(gate_raw)
+        joint_emb = torch.cat([gph_emb, gate * modal_fused], dim=-1)
+        return joint_emb
