@@ -352,6 +352,36 @@ class MyGram:
             "--joint_use_icl", action="store_true", default=False, help="joint_use_icl"
         )
         parser.add_argument(
+            "--use_cosface_loss", action="store_true", default=False, help="use CosFace margin contrastive loss"
+        )
+        parser.add_argument(
+            "--cosface_margin", type=float, default=0.15, help="cosine margin for CosFace"
+        )
+        parser.add_argument(
+            "--cosface_scale", type=float, default=16.0, help="scale factor for CosFace"
+        )
+        parser.add_argument(
+            "--cosface_hard_topk", type=int, default=10, help="topk hard negatives for CosFace"
+        )
+        parser.add_argument(
+            "--cosface_hard_weight", type=float, default=0.05, help="weight for hard negative repulsion"
+        )
+        parser.add_argument(
+            "--cosface_warmup_epoch", type=int, default=50, help="warmup epochs for CosFace margin"
+        )
+        parser.add_argument(
+            "--cosface_hard_margin", type=float, default=0.2, help="margin for hard negative repulsion"
+        )
+        parser.add_argument(
+            "--cosface_focal_gamma", type=float, default=2.0, help="focal gamma for hard example weighting"
+        )
+        parser.add_argument(
+            "--cosface_t_max", type=float, default=0.15, help="initial temperature for annealing"
+        )
+        parser.add_argument(
+            "--use_bi_nce", action="store_true", default=False, help="use bidirectional InfoNCE"
+        )
+        parser.add_argument(
             "--use_joint_loss",
             action="store_true",
             default=False,
@@ -629,9 +659,24 @@ class MyGram:
             )
 
         if self.args.joint_use_nce:
-            self.criterion_align = InfoNCE_loss(
-                device=self.device, temperature=self.args.tau
-            )
+            if self.args.use_cosface_loss:
+                self.criterion_align = CosFaceMarginLoss(
+                    temperature=self.args.tau,
+                    margin=self.args.cosface_margin,
+                    scale=self.args.cosface_scale,
+                    hard_neg_topk=self.args.cosface_hard_topk,
+                    hard_neg_weight=self.args.cosface_hard_weight,
+                    hard_neg_margin=self.args.cosface_hard_margin,
+                    focal_gamma=self.args.cosface_focal_gamma,
+                    t_max=self.args.cosface_t_max,
+                    bidirectional=True,
+                )
+            else:
+                self.criterion_align = InfoNCE_loss(
+                    device=self.device,
+                    temperature=self.args.tau,
+                    bidirectional=self.args.use_bi_nce,
+                )
 
     def semi_supervised_learning(self):
 
@@ -676,9 +721,21 @@ class MyGram:
         char_emb,
         train_ill,
     ):
-        loss_nce = self.criterion_align(joint_emb, train_ill) if joint_emb is not None else 0
-        print(" joint loss: {:f},".format(loss_nce), end="")
-        return loss_nce
+        if joint_emb is None:
+            return 0
+
+        if self.args.use_cosface_loss:
+            epoch_ratio = min(1.0, max(0.0, getattr(self, "current_epoch", 0) / max(1, self.args.cosface_warmup_epoch)))
+            loss_total, loss_ce, loss_hard = self.criterion_align(
+                joint_emb, train_ill, epoch_ratio=epoch_ratio)
+            print(" total: {:.6f}, ce: {:.6f}, hard: {:.6f}, m_ratio: {:.3f},".format(
+                loss_total.item(), loss_ce.item(), loss_hard.item(), epoch_ratio
+            ), end="")
+            return loss_total
+        else:
+            loss_nce = self.criterion_align(joint_emb, train_ill)
+            print(" joint loss: {:f},".format(loss_nce), end="")
+            return loss_nce
 
     def train(self):
 
@@ -697,6 +754,7 @@ class MyGram:
         self.input_idx = torch.LongTensor(np.arange(self.ENT_NUM)).to(device)
 
         for epoch in range(self.args.epochs):
+            self.current_epoch = epoch
             if not self.args.use_simple_lr:
                 if epoch == epoch >= self.args.il_start:
                     self.optimizer = optim.AdamW(self.params, lr=self.args.lr / 5)

@@ -56,6 +56,15 @@ CUDA_VISIBLE_DEVICES=${gpu_id} python3 -u src/run.py \
     --use_ms_loss \
     --use_joint_loss \
     --joint_use_nce \
+    --use_cosface_loss \
+    --cosface_margin 0.15 \
+    --cosface_scale 2 \
+    --cosface_hard_topk 10 \
+    --cosface_hard_weight 0.05 \
+    --cosface_hard_margin 0.15 \
+    --cosface_focal_gamma 0 \
+    --cosface_t_max 0.1 \
+    --cosface_warmup_epoch 50 \
     --LMFrank ${rank} \
     --use_GphForward ${use_GphForward} \
     --add_other_modal ${other_modal_type} \

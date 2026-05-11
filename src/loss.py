@@ -24,24 +24,102 @@ class CustomMultiLossLayer(nn.Module):
 
 
 class InfoNCE_loss(nn.Module):
-    def __init__(self, device, temperature=0.05) -> None:
+    """Bidirectional InfoNCE with optional temperature."""
+    def __init__(self, device=None, temperature=0.05, bidirectional=False) -> None:
         super().__init__()
-        self.device = device
         self.t = temperature
+        self.bidirectional = bidirectional
         self.ce_loss = nn.CrossEntropyLoss()
 
-    def sim(self, emb_left, emb_right):
-        return emb_left.mm(emb_right.t())
-
     def forward(self, emb, train_links):
-        emb = F.normalize(emb)
-        emb_train_left = emb[train_links[:, 0]]
-        emb_train_right = emb[train_links[:, 1]]
-        score = self.sim(emb_train_left, emb_train_right)
-        bsize = emb_train_left.size()[0]
-        label = torch.arange(bsize, dtype=torch.long).cuda(self.device)
-        loss = self.ce_loss(score / self.t, label)
+        emb = F.normalize(emb, dim=-1)
+        if not torch.is_tensor(train_links):
+            train_links = torch.LongTensor(train_links).to(emb.device)
+        else:
+            train_links = train_links.to(emb.device)
+        left = emb[train_links[:, 0]]
+        right = emb[train_links[:, 1]]
+        score = left.mm(right.t())
+        label = torch.arange(score.size(0), dtype=torch.long, device=score.device)
+        loss_l2r = self.ce_loss(score / self.t, label)
+        if self.bidirectional:
+            loss_r2l = self.ce_loss(score.t() / self.t, label)
+            loss = 0.5 * (loss_l2r + loss_r2l)
+        else:
+            loss = loss_l2r
         return loss
+
+
+class CosFaceMarginLoss(nn.Module):
+    """CosFace-style margin contrastive loss with focal weighting,
+    temperature scheduling, and hard negative repulsion."""
+    def __init__(self, temperature=0.05, margin=0.15, scale=16.0,
+                 hard_neg_topk=10, hard_neg_weight=0.05, hard_neg_margin=0.2,
+                 focal_gamma=2.0, t_max=0.15, bidirectional=True):
+        super().__init__()
+        self.t_min = temperature
+        self.t_max = t_max
+        self.margin = margin
+        self.scale = scale
+        self.hard_neg_topk = hard_neg_topk
+        self.hard_neg_weight = hard_neg_weight
+        self.hard_neg_margin = hard_neg_margin
+        self.focal_gamma = focal_gamma
+        self.bidirectional = bidirectional
+        self.ce_loss = nn.CrossEntropyLoss(reduction='none')
+
+    def _one_side(self, score, B, margin_eff, t_eff):
+        label = torch.arange(B, dtype=torch.long, device=score.device)
+        score_m = score - margin_eff * torch.eye(B, device=score.device)
+        logits = self.scale * score_m / t_eff
+        loss_per_sample = self.ce_loss(logits, label)
+        if self.focal_gamma > 0:
+            probs = F.softmax(logits, dim=1)
+            p_pos = probs[range(B), label].detach()
+            focal_weight = (1.0 - p_pos) ** self.focal_gamma
+            loss_ce = (focal_weight * loss_per_sample).mean()
+        else:
+            loss_ce = loss_per_sample.mean()
+
+        eye = torch.eye(B, dtype=torch.bool, device=score.device)
+        neg = score.masked_fill(eye, -1e9)
+        pos = score.diag()
+        k = min(self.hard_neg_topk, B - 1)
+        hard = torch.topk(neg, k=k, dim=1).values
+        hm_scale = min(margin_eff / max(self.margin, 1e-8), 1.0)
+        hm = self.hard_neg_margin * hm_scale
+        loss_hard = F.softplus(
+            (hard - pos.unsqueeze(1) + hm) * 10.0
+        ).mean()
+        return loss_ce, loss_hard
+
+    def forward(self, emb, train_links, epoch_ratio=1.0):
+        emb = F.normalize(emb, dim=-1)
+        if not torch.is_tensor(train_links):
+            train_links = torch.LongTensor(train_links).to(emb.device)
+        else:
+            train_links = train_links.to(emb.device)
+        left = emb[train_links[:, 0]]
+        right = emb[train_links[:, 1]]
+        B = left.size(0)
+        if B <= 1:
+            return left.sum() * 0.0, left.sum() * 0.0, left.sum() * 0.0
+
+        margin_eff = self.margin * min(epoch_ratio, 1.0)
+        t_eff = self.t_max - (self.t_max - self.t_min) * min(epoch_ratio, 1.0)
+        score = left.mm(right.t())
+
+        loss_ce_l2r, loss_hard_l2r = self._one_side(score, B, margin_eff, t_eff)
+        if self.bidirectional:
+            loss_ce_r2l, loss_hard_r2l = self._one_side(score.t(), B, margin_eff, t_eff)
+            loss_ce = 0.5 * (loss_ce_l2r + loss_ce_r2l)
+            loss_hard = 0.5 * (loss_hard_l2r + loss_hard_r2l)
+        else:
+            loss_ce = loss_ce_l2r
+            loss_hard = loss_hard_l2r
+
+        total = loss_ce + self.hard_neg_weight * loss_hard
+        return total, loss_ce.detach(), loss_hard.detach()
 
 
 
