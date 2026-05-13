@@ -192,28 +192,35 @@ class StructureGuidedFusion(nn.Module):
         )
         self.reliability_beta = 0.35
 
+    def _reliability_posterior(self, g_norm, modal_embs):
+        g_modal = F.normalize(self.graph_to_modal(g_norm), dim=-1)
+        reliability_logits = []
+        for modal_emb in modal_embs:
+            m_modal = F.normalize(modal_emb, dim=-1)
+            reliability_feat = torch.cat(
+                [g_modal, m_modal, torch.abs(g_modal - m_modal), g_modal * m_modal],
+                dim=-1,
+            )
+            reliability_logits.append(self.reliability_mlp(reliability_feat))
+        return F.softmax(torch.cat(reliability_logits, dim=1), dim=1)
+
+    def _apply_reliability_scaling(self, modal_fused, reliability):
+        modal_num = reliability.size(1)
+        chunks = torch.chunk(modal_fused, modal_num, dim=-1)
+        weighted_chunks = []
+        for idx, chunk in enumerate(chunks):
+            scale = 1.0 + self.reliability_beta * (modal_num * reliability[:, idx:idx + 1] - 1.0)
+            weighted_chunks.append(chunk * scale)
+        return torch.cat(weighted_chunks, dim=-1)
+
     def forward(self, gph_emb, modal_fused, modal_embs=None):
         g_norm = F.normalize(gph_emb, dim=-1)
         if modal_embs is not None:
             modal_embs = [emb for emb in modal_embs if emb is not None]
             modal_num = len(modal_embs)
             if modal_num > 0 and modal_fused.size(1) == modal_num * self.modal_dim:
-                g_modal = F.normalize(self.graph_to_modal(g_norm), dim=-1)
-                reliability_logits = []
-                for modal_emb in modal_embs:
-                    m_modal = F.normalize(modal_emb, dim=-1)
-                    rel_feat = torch.cat(
-                        [g_modal, m_modal, torch.abs(g_modal - m_modal), g_modal * m_modal],
-                        dim=-1,
-                    )
-                    reliability_logits.append(self.reliability_mlp(rel_feat))
-                reliability = F.softmax(torch.cat(reliability_logits, dim=1), dim=1)
-                chunks = torch.chunk(modal_fused, modal_num, dim=-1)
-                weighted_chunks = []
-                for idx, chunk in enumerate(chunks):
-                    scale = 1.0 + self.reliability_beta * (modal_num * reliability[:, idx:idx + 1] - 1.0)
-                    weighted_chunks.append(chunk * scale)
-                modal_fused = torch.cat(weighted_chunks, dim=-1)
+                reliability = self._reliability_posterior(g_norm, modal_embs)
+                modal_fused = self._apply_reliability_scaling(modal_fused, reliability)
 
         m_norm = F.normalize(modal_fused, dim=-1)
         gate_raw = self.gate_mlp(torch.cat([g_norm, m_norm], dim=-1))
