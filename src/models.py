@@ -212,7 +212,7 @@ class MultiModalEncoderMrFusion(nn.Module):
                     if att_emb is not None:
                         joint_emb_list.append(att_emb)
                     joint_emb = self.fusion1(joint_emb_list)
-                    joint_emb = self.sg_fusion(gph_emb, joint_emb)
+                    joint_emb = self.sg_fusion(gph_emb, joint_emb, joint_emb_list)
         else:
             gph_emb = None
         name_emb, char_emb = None, None

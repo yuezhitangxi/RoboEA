@@ -175,15 +175,46 @@ class BertLayer(nn.Module):
 class StructureGuidedFusion(nn.Module):
     def __init__(self, graph_dim, fused_modal_dim, dropout=0.1):
         super().__init__()
+        self.modal_num = 3
+        self.modal_dim = fused_modal_dim // self.modal_num
+        self.graph_to_modal = nn.Linear(graph_dim, self.modal_dim)
+        self.reliability_mlp = nn.Sequential(
+            nn.Linear(self.modal_dim * 4, self.modal_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(self.modal_dim, 1),
+        )
         self.gate_mlp = nn.Sequential(
             nn.Linear(graph_dim + fused_modal_dim, 512),
             nn.ReLU(),
             nn.Dropout(dropout),
             nn.Linear(512, fused_modal_dim),
         )
+        self.reliability_beta = 0.35
 
-    def forward(self, gph_emb, modal_fused):
+    def forward(self, gph_emb, modal_fused, modal_embs=None):
         g_norm = F.normalize(gph_emb, dim=-1)
+        if modal_embs is not None:
+            modal_embs = [emb for emb in modal_embs if emb is not None]
+            modal_num = len(modal_embs)
+            if modal_num > 0 and modal_fused.size(1) == modal_num * self.modal_dim:
+                g_modal = F.normalize(self.graph_to_modal(g_norm), dim=-1)
+                reliability_logits = []
+                for modal_emb in modal_embs:
+                    m_modal = F.normalize(modal_emb, dim=-1)
+                    rel_feat = torch.cat(
+                        [g_modal, m_modal, torch.abs(g_modal - m_modal), g_modal * m_modal],
+                        dim=-1,
+                    )
+                    reliability_logits.append(self.reliability_mlp(rel_feat))
+                reliability = F.softmax(torch.cat(reliability_logits, dim=1), dim=1)
+                chunks = torch.chunk(modal_fused, modal_num, dim=-1)
+                weighted_chunks = []
+                for idx, chunk in enumerate(chunks):
+                    scale = 1.0 + self.reliability_beta * (modal_num * reliability[:, idx:idx + 1] - 1.0)
+                    weighted_chunks.append(chunk * scale)
+                modal_fused = torch.cat(weighted_chunks, dim=-1)
+
         m_norm = F.normalize(modal_fused, dim=-1)
         gate_raw = self.gate_mlp(torch.cat([g_norm, m_norm], dim=-1))
         gate = 1.0 + 0.08 * torch.tanh(gate_raw)
