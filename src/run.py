@@ -727,7 +727,7 @@ class MyGram:
         if self.args.use_cosface_loss:
             epoch_ratio = min(1.0, max(0.0, getattr(self, "current_epoch", 0) / max(1, self.args.cosface_warmup_epoch)))
             loss_total, loss_ce, loss_hard = self.criterion_align(
-                joint_emb, train_ill, epoch_ratio=epoch_ratio)
+                joint_emb, train_ill, epoch_ratio=epoch_ratio, gph_emb=gph_emb)
             print(" total: {:.6f}, ce: {:.6f}, hard: {:.6f}, m_ratio: {:.3f},".format(
                 loss_total.item(), loss_ce.item(), loss_hard.item(), epoch_ratio
             ), end="")
