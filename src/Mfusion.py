@@ -12,8 +12,10 @@ class MFusion(nn.Module):
         self.args = args
         self.modal_num = modal_num
         self.fusion_layer = nn.ModuleList([BertLayer(args) for _ in range(args.num_hidden_layers)])
+        self.context_beta = 0.0
+        self.reliability_attention_mix = 0.0
         
-    def forward(self, embs):
+    def forward(self, embs, reliability=None):
         embs = [embs[idx] for idx in range(len(embs)) if embs[idx] is not None]
         modal_num = len(embs)
 
@@ -25,7 +27,17 @@ class MFusion(nn.Module):
         attention_pro = torch.sum(layer_outputs[1], dim=-3)
         attention_pro_comb = torch.sum(attention_pro, dim=-2) / math.sqrt(modal_num * self.args.num_attention_heads)
         weight_norm = F.softmax(attention_pro_comb, dim=-1)
-        embs = [weight_norm[:, idx].unsqueeze(1) * F.normalize(embs[idx]) for idx in range(modal_num)]
+        if reliability is not None and reliability.size(1) == modal_num:
+            weight_norm = (
+                (1.0 - self.reliability_attention_mix) * weight_norm
+                + self.reliability_attention_mix * reliability
+            )
+        embs = [
+            weight_norm[:, idx].unsqueeze(1) * F.normalize(
+                embs[idx] + self.context_beta * hidden_states[:, idx]
+            )
+            for idx in range(modal_num)
+        ]
         joint_emb = torch.cat(embs, dim=1)
         
         
@@ -191,6 +203,9 @@ class StructureGuidedFusion(nn.Module):
             nn.Linear(512, fused_modal_dim),
         )
         self.reliability_beta = 0.35
+        self.reliability_temperature = 1.00
+        self.input_reliability_beta = 0.0
+        self.modal_balance_logit = nn.Parameter(torch.tensor(-1.3862944))
 
     def _reliability_posterior(self, g_norm, modal_embs):
         g_modal = F.normalize(self.graph_to_modal(g_norm), dim=-1)
@@ -202,7 +217,8 @@ class StructureGuidedFusion(nn.Module):
                 dim=-1,
             )
             reliability_logits.append(self.reliability_mlp(reliability_feat))
-        return F.softmax(torch.cat(reliability_logits, dim=1), dim=1)
+        reliability_logits = torch.cat(reliability_logits, dim=1)
+        return F.softmax(reliability_logits / self.reliability_temperature, dim=1)
 
     def _apply_reliability_scaling(self, modal_fused, reliability):
         modal_num = reliability.size(1)
@@ -213,17 +229,27 @@ class StructureGuidedFusion(nn.Module):
             weighted_chunks.append(chunk * scale)
         return torch.cat(weighted_chunks, dim=-1)
 
-    def forward(self, gph_emb, modal_fused, modal_embs=None):
+    def reweight_modal_inputs(self, modal_embs, reliability):
+        modal_num = reliability.size(1)
+        weighted_embs = []
+        for idx, modal_emb in enumerate(modal_embs):
+            scale = 1.0 + self.input_reliability_beta * (modal_num * reliability[:, idx:idx + 1] - 1.0)
+            weighted_embs.append(modal_emb * scale)
+        return weighted_embs
+
+    def forward(self, gph_emb, modal_fused, modal_embs=None, reliability=None):
         g_norm = F.normalize(gph_emb, dim=-1)
         if modal_embs is not None:
             modal_embs = [emb for emb in modal_embs if emb is not None]
             modal_num = len(modal_embs)
             if modal_num > 0 and modal_fused.size(1) == modal_num * self.modal_dim:
-                reliability = self._reliability_posterior(g_norm, modal_embs)
+                if reliability is None:
+                    reliability = self._reliability_posterior(g_norm, modal_embs)
                 modal_fused = self._apply_reliability_scaling(modal_fused, reliability)
 
         m_norm = F.normalize(modal_fused, dim=-1)
         gate_raw = self.gate_mlp(torch.cat([g_norm, m_norm], dim=-1))
         gate = 1.0 + 0.08 * torch.tanh(gate_raw)
-        joint_emb = torch.cat([gph_emb, gate * modal_fused], dim=-1)
+        modal_scale = 0.75 + 0.5 * torch.sigmoid(self.modal_balance_logit)
+        joint_emb = torch.cat([gph_emb, modal_scale * gate * modal_fused], dim=-1)
         return joint_emb

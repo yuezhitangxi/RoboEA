@@ -211,8 +211,16 @@ class MultiModalEncoderMrFusion(nn.Module):
                         joint_emb_list.append(rel_emb)
                     if att_emb is not None:
                         joint_emb_list.append(att_emb)
-                    joint_emb = self.fusion1(joint_emb_list)
-                    joint_emb = self.sg_fusion(gph_emb, joint_emb, joint_emb_list)
+                    reliability = self.sg_fusion._reliability_posterior(
+                        F.normalize(gph_emb, dim=-1), joint_emb_list
+                    )
+                    guided_joint_emb_list = self.sg_fusion.reweight_modal_inputs(
+                        joint_emb_list, reliability
+                    )
+                    joint_emb = self.fusion1(guided_joint_emb_list, reliability=reliability)
+                    joint_emb = self.sg_fusion(
+                        gph_emb, joint_emb, joint_emb_list, reliability=reliability
+                    )
         else:
             gph_emb = None
         name_emb, char_emb = None, None
