@@ -1,6 +1,10 @@
 gpu_id='1'
 # 'FB15K_DB15K' 'FB15K_YAGO15K' 'zh_en' 'ja_en' 'fr_en'
-dataset='FBDB15K'
+dataset='FB15K_DB15K'
+noise_name='Full_MHN'
+noise_ratio=0.2
+noise_ratio_tag=20
+use_noisy_data=1
 ratio=0.2
 seed=2023
 il_start=50
@@ -14,7 +18,14 @@ Is_LMFSoftmax=0
 joint_type=1
 mr_fusion_type=7
 final_fusion_type=(0)
-if [[ "$dataset" == *"FB"* ]]; then
+if [[ "$dataset" == "FB15K_DB15K" ]]; then
+    data_name='FBDB15K'
+elif [[ "$dataset" == "FB15K_YAGO15K" ]]; then
+    data_name='FBYG15K'
+else
+    data_name=${dataset}
+fi
+if [[ "$data_name" == *"FB"* ]]; then
     dataset_dir='mmkg'
     tau=0.1
     other_modal_type=0
@@ -23,13 +34,25 @@ else
     tau=0.1
     ratio=0.3
 fi
-echo "Running with dataset=${dataset}, ratio=${ratio}"
+if [[ "${use_noisy_data}" == "1" ]]; then
+    noisy_tag="${dataset}_${noise_name}_${noise_ratio_tag}"
+    file_dir="data/noisy/${noisy_tag}"
+    img_feature_path="data/mmkg/pkls/${noisy_tag}_GA_id_img_feature_dict.pkl"
+else
+    file_dir="data/${dataset_dir}/${data_name}/norm"
+    img_feature_path=""
+fi
+echo "Running with dataset=${dataset}, ratio=${ratio}, file_dir=${file_dir}"
 current_datetime=$(date +"%Y-%m-%d-%H-%M")
 head_name=${current_datetime}_${dataset}
+if [[ "${use_noisy_data}" == "1" ]]; then
+    head_name=${head_name}_${noise_name}_${noise_ratio}
+fi
 file_name=${head_name}_${ratio}
 echo ${file_name}
 CUDA_VISIBLE_DEVICES=${gpu_id} python3 -u src/run.py \
-    --file_dir data/${dataset_dir}/${dataset}/norm \
+    --file_dir ${file_dir} \
+    ${img_feature_path:+--img_feature_path ${img_feature_path}} \
     --pred_name ${file_name} \
     --rate ${ratio} \
     --lr .0005 \

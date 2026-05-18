@@ -33,9 +33,11 @@ except:
 
 
 
-def load_img_features_use_mean_img(ent_num, file_dir, triples):
+def load_img_features_use_mean_img(ent_num, file_dir, triples, img_feature_path=None):
     # load images features
-    if "V1" in file_dir:
+    if img_feature_path is not None:
+        img_vec_path = img_feature_path
+    elif "V1" in file_dir:
         split = "norm"
         img_vec_path = "data/pkls/dbpedia_wikidata_15k_norm_GA_id_img_feature_dict.pkl"
     elif "V2" in file_dir:
@@ -50,6 +52,7 @@ def load_img_features_use_mean_img(ent_num, file_dir, triples):
         split = file_dir.split("/")[-1]
         img_vec_path = "data/mmkg/pkls/" + split + "_GA_id_img_feature_dict.pkl"
 
+    print("image feature path:", img_vec_path)
     img_features = load_img_new(ent_num, img_vec_path, triples)
     return img_features
 
@@ -297,6 +300,12 @@ class MyGram:
         parser.add_argument(
             "--img_dp_ratio", type=float, default=1.0, help="image dropout ratio"
         )
+        parser.add_argument(
+            "--img_feature_path",
+            type=str,
+            default=None,
+            help="optional image feature pkl path; useful for noisy datasets",
+        )
 
         parser.add_argument("--ms_alpha", type=float, default=0.1, help="ms scale_pos")
         parser.add_argument("--ms_beta", type=float, default=40.0, help="ms scale_neg")
@@ -526,7 +535,7 @@ class MyGram:
             pass
         else:
             self.img_features = load_img_features_use_mean_img(
-                self.ENT_NUM, file_dir, self.triples
+                self.ENT_NUM, file_dir, self.triples, self.args.img_feature_path
             )
 
         self.img_features = F.normalize(torch.Tensor(self.img_features).to(device))
